@@ -3,22 +3,30 @@
 #include <iostream>
 #include <fstream>
 
-Pipe init_pipe(std::string name = "Empty pipe", int len = 0, int diameter = 0, bool repair = true) {
-
+Pipe init_pipe(const std::string &name, int len, int diameter, bool repair) {
+    Pipe pipe;
+    pipe.name = name;
+    pipe.len = len;
+    pipe.diameter = diameter;
+    pipe.repair = repair;
+    return pipe;
 }
 
-void print_pipe_data(Pipe P) {
-
+void print_pipe_data(const Pipe &P) {
+    std::cout 
+    << "Name: " << P.name 
+    << ", len: " << P.len 
+    << ", diameter: " << P.diameter 
+    << ", repair status: "<< (P.repair ? "under repair" : "repaired")
+    << std::endl;
+    return;
 }
 
-void repair_change(Pipe P) {
-
+void repair_change(Pipe &P) {
+    P.repair = !P.repair;
 }
 
-void pipe_save_into_file(Pipe pipe, std::string filename = "output.txt") {
-
-}
-
-Pipe pipe_read_from_file(std::string filename = "input.txt", Pipe pipe = init_pipe()) {
-
+bool isEmpty (const Pipe &P) {
+    if (P.len == 0 && P.diameter == 0) return 1;
+    else return 0;
 }

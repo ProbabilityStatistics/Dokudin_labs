@@ -1,8 +1,6 @@
-#include "pipe.h"
-#include "compressor_station.h"
+#include "process.h"
 
-int main(int argc, char* argv[]) {
-    
-
+int main() {
+    process();
     return 0;
 }
