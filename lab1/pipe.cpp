@@ -3,13 +3,12 @@
 #include <iostream>
 #include <fstream>
 
-Pipe init_pipe(const std::string &name, int len, int diameter, bool repair) {
-    Pipe pipe;
-    pipe.name = name;
-    pipe.len = len;
-    pipe.diameter = diameter;
-    pipe.repair = repair;
-    return pipe;
+Pipe::Pipe() {
+    name = "Empty pipe";
+    len = 0;
+    diameter = 0;
+    repair = 0;
+    id = -1;
 }
 
 void print_pipe_data(const Pipe &P) {
@@ -31,32 +30,17 @@ bool isEmpty (const Pipe &P) {
     else return 0;
 }
 
-void pipe_save_into_file(const Pipe &P, const std::string &filename) {
-    std::ofstream fout(filename, std::ios::app);
-    if (fout.is_open()) {
-        fout << "Pipe" << std::endl;
-        fout << P.name << std::endl << P.len << std::endl << P.diameter << 
-            std::endl << P.repair << std::endl;
-        fout.close();
-    } else {
-        std::cout << "Error! Cannot open file" << std::endl;
-    }
+void pipe_save_into_file(const Pipe &P, std::ofstream &fout) {
+    fout << "Pipe" << std::endl;
+    fout << P.name << std::endl 
+        << P.len << std::endl 
+        << P.diameter << std::endl 
+        << P.repair << std::endl;
 }
 
-Pipe pipe_read_from_file(const std::string &filename) {
-    std::ifstream fin(filename);
+Pipe pipe_read_from_file(std::ifstream &fin) {
     Pipe P = init_pipe("Empty pipe", 0, 0, true);
-    if (fin.is_open()) {
-        std::string struct_type;
-        while(std::getline(fin, struct_type)) {
-            if (!struct_type.compare("Pipe")) {
-                std::getline(fin, P.name);
-                fin >> P.len >> P.diameter >> P.repair;
-            }
-        }
-        fin.close();
-    } else {
-        std::cout << "Error! Cannot open file" << std::endl;
-    }
+    std::getline(fin, P.name);
+    fin >> P.len >> P.diameter >> P.repair;
     return P;
 }

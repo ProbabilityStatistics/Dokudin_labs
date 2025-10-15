@@ -27,7 +27,6 @@ int main_menu() {
             return -1;
         }
     } catch (...) {
-        std::cout << "Error!" << std::endl;
         return -1;
     }
 }
@@ -46,13 +45,13 @@ void tmp_mode_change(CS &comp_st) {
 void save_into_file(const Pipe &P, const CS &comp_st) {
     std::string filename;
     std::cout << "Enter filename" << std::endl;
-    //std::getchar();
     std::getline(std::cin>>std::ws, filename);
+    std::ofstream fout(filename);
     if (!isEmpty(P)) {
-        pipe_save_into_file(P, filename);
+        pipe_save_into_file(P, fout);
     }
     if (!isEmpty(comp_st)) {
-        cs_save_into_file(comp_st, filename);
+        cs_save_into_file(comp_st, fout);
     }
     return;
 }
@@ -60,18 +59,26 @@ void save_into_file(const Pipe &P, const CS &comp_st) {
 void read_from_file(Pipe &P, CS &comp_st) {
     std::string filename;
     std::cout << "Enter filename" << std::endl;
-    std::getchar();
-    std::getline(std::cin, filename);
-    
-    P = pipe_read_from_file(filename);
-    comp_st = cs_read_from_file(filename);
+    std::getline(std::cin>>std::ws, filename);
+    std::ifstream fin(filename);
+    if (fin.is_open()) {
+        std::string struct_type;
+        while (std::getline(fin, struct_type)) {
+            if (struct_type == "Pipe") P = pipe_read_from_file(fin);
+            else if (struct_type == "CS") comp_st = cs_read_from_file(fin);
+            else {
+                std::cout << "Error! Something went wrong while reading the file";
+            }
+        }
+    } else {
+        std::cout << "Error! Cannot open file" << std::endl;
+    }
     return;
 }
 
 void pipe_recreation(Pipe &P) {
     std::cout << "Print pipe name" << std::endl;
-    std::getchar();
-    std::getline(std::cin, P.name);
+    std::getline(std::cin>>std::ws, P.name);
     std::cout << "Print pipe lenght" << std::endl;
     std::cin >> P.len;
     std::cout << "Print pipe diameter" << std::endl;
@@ -84,7 +91,7 @@ void pipe_recreation(Pipe &P) {
 void cs_recreation(CS &comp_st) {
     std::cout << "Print CS name" << std::endl;
     std::getchar();
-    std::getline(std::cin, comp_st.name);
+    std::getline(std::cin>>std::ws, comp_st.name);
     std::cout << "Print CS workshops count" << std::endl;
     std::cin >> comp_st.workshop_count;
     std::cout << "Print CS number of working workshops" << std::endl;
@@ -94,7 +101,6 @@ void cs_recreation(CS &comp_st) {
 }
 
 void process() {
-    bool flag = 1;
     Pipe P = init_pipe("Empty pipe", 0, 0, true);
     CS comp_st = init_cs("Empty compressor station", 0, 0, -1);
     std::vector<std::pair<std::function<void()>, std::string>> actions = {
@@ -107,11 +113,11 @@ void process() {
         {[&P, &comp_st]() {save_into_file(P, comp_st);}, "Save"},
         {[&P, &comp_st]() {read_from_file(P, comp_st);}, "Load"},
     };
-    while (flag) {
+    while (true) {
         int n = main_menu();
         if (n != -1) {
-            if (n == 8) {
-                flag = !flag;
+            if (n == (int) actions.size()) {
+                break;
             } else {
                 std::cout << actions[n].second << std::endl;
                 actions[n].first();

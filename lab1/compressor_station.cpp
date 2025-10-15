@@ -38,32 +38,17 @@ bool isEmpty(const CS &comp_st) {
     else return 0;
 }
 
-void cs_save_into_file(const CS &comp_st, const std::string &filename) {
-    std::ofstream fout(filename, std::ios::app);
-    if (fout.is_open()) {
-        fout << "CS" << std::endl;
-        fout << comp_st.name << std::endl << comp_st.workshop_count << std::endl << comp_st.working_workshop << 
-            std::endl << comp_st.station_class << std::endl;
-        fout.close();
-    } else {
-        std::cout << "Error! Cannot open file" << std::endl;
-    }
+void cs_save_into_file(const CS &comp_st, std::ofstream &fout) {
+    fout << "CS" << std::endl;
+    fout << comp_st.name << std::endl 
+        << comp_st.workshop_count << std::endl 
+        << comp_st.working_workshop << std::endl 
+        << comp_st.station_class << std::endl;
 }
 
-CS cs_read_from_file(const std::string &filename) {
-    std::ifstream fin(filename);
+CS cs_read_from_file(std::ifstream &fin) {
     CS comp_st = init_cs("Empty compressor station", 0, 0, -1);
-    if (fin.is_open()) {
-        std::string struct_type;
-        while(std::getline(fin, struct_type)) {
-            if (!struct_type.compare("CS")) {
-                std::getline(fin, comp_st.name);
-                fin >> comp_st.workshop_count >> comp_st.working_workshop >> comp_st.station_class;
-            }
-        }
-        fin.close();
-    } else {
-        std::cout << "Error! Cannot open file" << std::endl;
-    }
+    std::getline(fin, comp_st.name);
+    fin >> comp_st.workshop_count >> comp_st.working_workshop >> comp_st.station_class;
     return comp_st;
 }
