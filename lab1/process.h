@@ -11,7 +11,7 @@ int comand_num(std::string str);
 void tmp_mode_change(CS &comp_st);
 void save_into_file(const Pipe &P, const CS &comp_st);
 void read_from_file(Pipe &P, CS &comp_st);
-void pipe_recreation(Pipe &P);
-void cs_recreation(CS &comp_st);
+void pipe_add(Pipe &P);
+void cs_add(CS &comp_st);
 
 #endif

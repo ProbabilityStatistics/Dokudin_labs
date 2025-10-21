@@ -3,7 +3,10 @@
 #include <iostream>
 #include <fstream>
 
+std::atomic<int> Pipe::next_id{0};
+
 Pipe::Pipe() {
+    id = next_id.fetch_add(1, std::memory_order_relaxed);
     name = "Empty pipe";
     len = 0;
     diameter = 0;
@@ -11,36 +14,50 @@ Pipe::Pipe() {
     id = -1;
 }
 
-void print_pipe_data(const Pipe &P) {
+void Pipe::print_pipe_data() const{
     std::cout 
-    << "Name: " << P.name 
-    << ", len: " << P.len 
-    << ", diameter: " << P.diameter 
-    << ", repair status: "<< (P.repair ? "under repair" : "repaired")
+    << "Name: " << name 
+    << ", len: " << len 
+    << ", diameter: " << diameter 
+    << ", repair status: "<< (repair ? "under repair" : "repaired")
     << std::endl;
     return;
 }
 
-void repair_change(Pipe &P) {
-    P.repair = !P.repair;
+void Pipe::repair_change() {
+    repair = !repair;
 }
 
-bool isEmpty (const Pipe &P) {
-    if (P.len == 0 && P.diameter == 0) return 1;
+bool Pipe::isEmpty () const{
+    if (len == 0 && diameter == 0) return 1;
     else return 0;
 }
 
-void pipe_save_into_file(const Pipe &P, std::ofstream &fout) {
+void Pipe::pipe_save_into_file(std::ofstream &fout) const {
     fout << "Pipe" << std::endl;
-    fout << P.name << std::endl 
-        << P.len << std::endl 
-        << P.diameter << std::endl 
-        << P.repair << std::endl;
+    fout << name << std::endl 
+        << len << std::endl 
+        << diameter << std::endl 
+        << repair << std::endl;
 }
 
-Pipe pipe_read_from_file(std::ifstream &fin) {
-    Pipe P = init_pipe("Empty pipe", 0, 0, true);
-    std::getline(fin, P.name);
-    fin >> P.len >> P.diameter >> P.repair;
-    return P;
+void Pipe::pipe_read_from_file(std::ifstream &fin) {
+    std::getline(fin, name);
+    fin >> len >> diameter >> repair;
+    return;
+}
+
+void Pipe::set(std::string n, int l, int d, bool r) {
+    name = n;
+    len = l;
+    diameter = d;
+    repair = r;
+}
+
+int Pipe::get_id() const {
+    return id;
+}
+
+std::string Pipe::get_name() const {
+    return name;
 }

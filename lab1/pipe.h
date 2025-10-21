@@ -2,6 +2,7 @@
 #define PIPE_H
 
 #include <string>
+#include <atomic>
 
 class Pipe {
 private:
@@ -10,14 +11,18 @@ private:
     int diameter;
     bool repair;
     int id;
+    static std::atomic<int> next_id;
 public:
     Pipe();
     ~Pipe();
-    void print_pipe_data(const Pipe &P);
-    void repair_change(Pipe &P);
-    bool isEmpty (const Pipe &P);
-    void pipe_save_into_file(const Pipe &P, std::ofstream &fout);
-    Pipe pipe_read_from_file(std::ifstream &fin);
+    void print_pipe_data() const;
+    void repair_change();
+    bool isEmpty() const;
+    void pipe_save_into_file(std::ofstream &fout) const;
+    void pipe_read_from_file(std::ifstream &fin);
+    void set(std::string n, int l, int d, bool r);
+    int get_id() const;
+    std::string get_name() const;
 };
 /*
 typedef struct Pipe {

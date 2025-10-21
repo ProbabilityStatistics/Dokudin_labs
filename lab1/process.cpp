@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <vector>
+#include <unordered_map>
 #include <string>
 #include <functional>
 #include <limits>
@@ -11,8 +12,8 @@
 
 int main_menu() {
     std::cout << "Menu" << std::endl;
-    std::vector <std::string> operations = {"Create pipe", "Print pipe info", "Change repair status",
-                "Create CS", "Print CS info", "Change CS working workshops", "Save", "Load", "Exit"};
+    std::vector <std::string> operations = {"Add new pipe", "Print pipes info", "Change repair status",
+                "Add new CS", "Print CSs info", "Change CS working workshops", "Save", "Load", "Exit"};
     for (int i = 0; i < (int) operations.size(); i++) {
         std::cout << i + 1 << ". " << operations[i] << std::endl;
     }
@@ -36,7 +37,7 @@ void tmp_mode_change(CS &comp_st) {
     int mode;
     std::cin >> mode;//!!!
     if (mode == 1 || mode == 2) {
-        mode_change(comp_st, mode);
+        comp_st.mode_change(mode);
     } else {
         std::cout << "Error! Incorrect input, returning in main menu" << std::endl;
     }
@@ -47,11 +48,11 @@ void save_into_file(const Pipe &P, const CS &comp_st) {
     std::cout << "Enter filename" << std::endl;
     std::getline(std::cin>>std::ws, filename);
     std::ofstream fout(filename);
-    if (!isEmpty(P)) {
-        pipe_save_into_file(P, fout);
+    if (P.isEmpty()) {
+        P.pipe_save_into_file(fout);
     }
-    if (!isEmpty(comp_st)) {
-        cs_save_into_file(comp_st, fout);
+    if (comp_st.isEmpty()) {
+        comp_st.cs_save_into_file(fout);
     }
     return;
 }
@@ -64,8 +65,15 @@ void read_from_file(Pipe &P, CS &comp_st) {
     if (fin.is_open()) {
         std::string struct_type;
         while (std::getline(fin, struct_type)) {
-            if (struct_type == "Pipe") P = pipe_read_from_file(fin);
-            else if (struct_type == "CS") comp_st = cs_read_from_file(fin);
+            if (struct_type == "Pipe") {
+                //Pipe p;
+                P.pipe_read_from_file(fin);
+                
+            }
+            else if (struct_type == "CS") {
+                //CS cs;
+                comp_st.cs_read_from_file(fin);
+            }
             else {
                 std::cout << "Error! Something went wrong while reading the file";
             }
@@ -76,40 +84,47 @@ void read_from_file(Pipe &P, CS &comp_st) {
     return;
 }
 
-void pipe_recreation(Pipe &P) {
+void pipe_add(Pipe &P) {
+    std::string name;
+    int len, diameter, repair;
     std::cout << "Print pipe name" << std::endl;
-    std::getline(std::cin>>std::ws, P.name);
+    std::getline(std::cin>>std::ws, name);
     std::cout << "Print pipe lenght" << std::endl;
-    std::cin >> P.len;
+    std::cin >> len;
     std::cout << "Print pipe diameter" << std::endl;
-    std::cin >> P.diameter;
+    std::cin >> diameter;
     std::cout << "Print pipe repair status" << std::endl;
-    std::cin >> P.repair;
+    std::cin >> repair;
+    if (repair == 1 || repair == 0) P.set(name, len, diameter, repair);
+    else std::cout << "Error! Incorrect repair status, returning in main menu" << std::endl;
     return;
 }
 
-void cs_recreation(CS &comp_st) {
+void cs_add(CS &comp_st) {
+    std::string name;
+    int workshop_count, working_workshop, station_class;
     std::cout << "Print CS name" << std::endl;
-    std::getchar();
-    std::getline(std::cin>>std::ws, comp_st.name);
+    std::getline(std::cin>>std::ws, name);
     std::cout << "Print CS workshops count" << std::endl;
-    std::cin >> comp_st.workshop_count;
+    std::cin >> workshop_count;
     std::cout << "Print CS number of working workshops" << std::endl;
-    std::cin >> comp_st.working_workshop;
+    std::cin >> working_workshop;
     std::cout << "Print CS station class" << std::endl;
-    std::cin >> comp_st.station_class;
+    std::cin >> station_class;
+    comp_st.set(name, workshop_count, working_workshop, station_class);
 }
 
 void process() {
-    Pipe P = init_pipe("Empty pipe", 0, 0, true);
-    CS comp_st = init_cs("Empty compressor station", 0, 0, -1);
+    std::unordered_map<int, Pipe> P;
+    std::unordered_map<int, CS> comp_st;
+    int id;
     std::vector<std::pair<std::function<void()>, std::string>> actions = {
-        {[&P]() {pipe_recreation(P);}, "Create pipe"},
-        {[&P]() {print_pipe_data(P);}, "Print pipe info"},
-        {[&P]() {repair_change(P);}, "Change repair status"},
-        {[&comp_st]() {cs_recreation(comp_st);}, "Create CS"},
-        {[&comp_st]() {print_cs_data(comp_st);}, "Print CS info"},
-        {[&comp_st]() {tmp_mode_change(comp_st);}, "Change CS working workshops"},
+        {[&P]() {pipe_add(P[]);}, "Create pipe"},
+        {[&P, id]() {P[id].print_pipe_data();}, "Print pipe info"},
+        {[&P]() {P[].repair_change();}, "Change repair status"},
+        {[&comp_st]() {cs_add(comp_st[]);}, "Create CS"},
+        {[&comp_st]() {comp_st[].print_cs_data();}, "Print CS info"},
+        {[&comp_st]() {tmp_mode_change(comp_st[]);}, "Change CS working workshops"},
         {[&P, &comp_st]() {save_into_file(P, comp_st);}, "Save"},
         {[&P, &comp_st]() {read_from_file(P, comp_st);}, "Load"},
     };
