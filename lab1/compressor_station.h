@@ -20,9 +20,9 @@ public:
     bool isEmpty() const;
     void cs_save_into_file(std::ofstream &fout) const;
     void cs_read_from_file(std::ifstream &fin);
-    void set(std::string name, int workshop_count, int working_workshop, int station_class);
-    int get_id();
-    int get_name();
+    void set(std::string n, int count, int working, int st_cl);
+    int get_id() const;
+    std::string get_name() const;
 };
 /*
 typedef struct CS {

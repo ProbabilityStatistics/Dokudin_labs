@@ -3,12 +3,17 @@
 #include <iostream>
 #include <fstream>
 
+std::atomic<int> CS::next_id{0};
+
 CS::CS() {
+    id = next_id.fetch_add(1, std::memory_order_relaxed);
     name = "Empty compressor station";
     station_class = 0;
     working_workshop = 0;
     workshop_count = -1;
 }
+
+CS::~CS() {}
 
 void CS::print_cs_data() const {
     std::cout 
@@ -49,4 +54,19 @@ void CS::cs_read_from_file(std::ifstream &fin) {
     std::getline(fin, name);
     fin >> workshop_count >> working_workshop >> station_class;
     return;
+}
+
+void CS::set(std::string n, int count, int working, int st_cl) {
+    name = name;
+    station_class = st_cl;
+    working_workshop = working;
+    workshop_count = count;
+}
+
+int CS::get_id() const {
+    return id;
+}
+
+std::string CS::get_name() const {
+    return name;
 }

@@ -32,15 +32,35 @@ int main_menu() {
     }
 }
 
-void tmp_mode_change(CS &comp_st) {
-    std::cout << "Enter" << std::endl << "1. Turn on" << std::endl << "2. Turn off" << std::endl;
-    int mode;
-    std::cin >> mode;//!!!
-    if (mode == 1 || mode == 2) {
-        comp_st.mode_change(mode);
+void tmp_repair_change(std::unordered_map<int, Pipe> &P) {
+    int id;
+    std::cout << "Enter pipe ID" << std::endl;
+    std::cin >> id;//!!!
+    if (auto search = P.find(id); search != P.end()) {
+        P[id].repair_change();
     } else {
-        std::cout << "Error! Incorrect input, returning in main menu" << std::endl;
+        std::cout << "Error! The CS with this ID was not found" << std::endl;
     }
+    return;
+}
+
+void tmp_mode_change(std::unordered_map<int, CS> &comp_st) {
+    int id;
+    int mode;
+    std::cout << "Enter compressor station ID" << std::endl;
+    std::cin >> id;//!!!
+    if (auto search = comp_st.find(id); search != comp_st.end()) {
+        std::cout << "Enter" << std::endl << "1. Turn on" << std::endl << "2. Turn off" << std::endl;
+        std::cin >> mode;//!!!
+        if (mode == 1 || mode == 2) {
+            comp_st[id].mode_change(mode);
+        } else {
+            std::cout << "Error! Incorrect input, returning in main menu" << std::endl;
+        }
+    } else {
+        std::cout << "Error! The CS with this ID was not found" << std::endl;
+    }
+    return;
 }
 
 void save_into_file(const std::unordered_map<int, Pipe> &P, const std::unordered_map<int, CS> &comp_st) {
@@ -62,7 +82,7 @@ void save_into_file(const std::unordered_map<int, Pipe> &P, const std::unordered
     return;
 }
 
-void read_from_file(Pipe &P, CS &comp_st) {
+void read_from_file(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st) {
     std::string filename;
     std::cout << "Enter filename" << std::endl;
     std::getline(std::cin>>std::ws, filename);
@@ -71,13 +91,14 @@ void read_from_file(Pipe &P, CS &comp_st) {
         std::string struct_type;
         while (std::getline(fin, struct_type)) {
             if (struct_type == "Pipe") {
-                //Pipe p;
-                P.pipe_read_from_file(fin);
-                
+                Pipe p;
+                p.pipe_read_from_file(fin);
+                P[p.get_id()] = p;
             }
             else if (struct_type == "CS") {
-                //CS cs;
-                comp_st.cs_read_from_file(fin);
+                CS cs;
+                cs.cs_read_from_file(fin);
+                comp_st[cs.get_id()] = cs;
             }
             else {
                 std::cout << "Error! Something went wrong while reading the file";
@@ -141,14 +162,13 @@ void cs_info(std::unordered_map<int, CS> &comp_st) {
 void process() {
     std::unordered_map<int, Pipe> P;
     std::unordered_map<int, CS> comp_st;
-    int id;
     std::vector<std::pair<std::function<void()>, std::string>> actions = {
         {[&P]() {pipe_add(P);}, "Create pipe"},
         {[&P]() {pipe_info(P);}, "Print pipe info"},
-        {[&P, id]() {P[id].repair_change();}, "Change repair status"},
+        {[&P]() {tmp_repair_change(P);}, "Change repair status"},
         {[&comp_st]() {cs_add(comp_st);}, "Create CS"},
         {[&comp_st]() {cs_info(comp_st);}, "Print CS info"},
-        {[&comp_st, id]() {tmp_mode_change(comp_st[id]);}, "Change CS working workshops"},
+        {[&comp_st]() {tmp_mode_change(comp_st);}, "Change CS working workshops"},
         {[&P, &comp_st]() {save_into_file(P, comp_st);}, "Save"},
         {[&P, &comp_st]() {read_from_file(P, comp_st);}, "Load"},
     };

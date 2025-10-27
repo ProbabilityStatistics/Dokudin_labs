@@ -14,6 +14,8 @@ Pipe::Pipe() {
     id = -1;
 }
 
+Pipe::~Pipe() {}
+
 void Pipe::print_pipe_data() const{
     std::cout 
     << "ID: " << id
