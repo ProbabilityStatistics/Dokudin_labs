@@ -3,15 +3,14 @@
 #include <iostream>
 #include <fstream>
 
-std::atomic<int> Pipe::next_id{0};
+std::atomic<int> Pipe::next_id{1};
 
 Pipe::Pipe() {
-    id = next_id.fetch_add(1, std::memory_order_relaxed);
+    id = Pipe::next_id.fetch_add(1, std::memory_order_relaxed);
     name = "Empty pipe";
     len = 0;
     diameter = 0;
     repair = 0;
-    id = -1;
 }
 
 Pipe::~Pipe() {}

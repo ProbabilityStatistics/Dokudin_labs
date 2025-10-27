@@ -124,7 +124,7 @@ void pipe_add(std::unordered_map<int, Pipe> &P) {
     std::cin >> repair;
     if (repair == 1 || repair == 0) {
         p.set(name, len, diameter, repair);
-        P[p.get_id()] = p;
+        P.emplace(p.get_id(), std::move(p));
     }
     else std::cout << "Error! Incorrect repair status, returning in main menu" << std::endl;
     return;
@@ -143,7 +143,7 @@ void cs_add(std::unordered_map<int, CS> &comp_st) {
     std::cout << "Print CS station class" << std::endl;
     std::cin >> station_class;
     cs.set(name, workshop_count, working_workshop, station_class);
-    comp_st[cs.get_id()] = cs;
+    comp_st.emplace(cs.get_id(), std::move(cs));
     return;
 }
 

@@ -6,7 +6,7 @@
 std::atomic<int> CS::next_id{0};
 
 CS::CS() {
-    id = next_id.fetch_add(1, std::memory_order_relaxed);
+    id = CS::next_id.fetch_add(1, std::memory_order_relaxed);
     name = "Empty compressor station";
     station_class = 0;
     working_workshop = 0;
