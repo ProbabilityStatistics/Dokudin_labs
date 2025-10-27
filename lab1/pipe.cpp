@@ -16,7 +16,8 @@ Pipe::Pipe() {
 
 void Pipe::print_pipe_data() const{
     std::cout 
-    << "Name: " << name 
+    << "ID: " << id
+    << ", name: " << name 
     << ", len: " << len 
     << ", diameter: " << diameter 
     << ", repair status: "<< (repair ? "under repair" : "repaired")

@@ -12,7 +12,8 @@ CS::CS() {
 
 void CS::print_cs_data() const {
     std::cout 
-    << "Name: " << name 
+    << "ID: " << id
+    << ", name: " << name 
     << ", station class: " << station_class 
     << ", working workshops: " << working_workshop 
     << ", workshop count: " << workshop_count 

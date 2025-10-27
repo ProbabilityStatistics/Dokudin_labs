@@ -43,17 +43,22 @@ void tmp_mode_change(CS &comp_st) {
     }
 }
 
-void save_into_file(const Pipe &P, const CS &comp_st) {
+void save_into_file(const std::unordered_map<int, Pipe> &P, const std::unordered_map<int, CS> &comp_st) {
     std::string filename;
     std::cout << "Enter filename" << std::endl;
     std::getline(std::cin>>std::ws, filename);
     std::ofstream fout(filename);
-    if (P.isEmpty()) {
-        P.pipe_save_into_file(fout);
+    for (const auto &[id, p] : P) {
+        if (!p.isEmpty()) {
+            p.pipe_save_into_file(fout);
+        }
     }
-    if (comp_st.isEmpty()) {
-        comp_st.cs_save_into_file(fout);
+    for (const auto &[id, cs] : comp_st) {
+        if (!cs.isEmpty()) {
+            cs.cs_save_into_file(fout);
+        }
     }
+    
     return;
 }
 
@@ -84,7 +89,8 @@ void read_from_file(Pipe &P, CS &comp_st) {
     return;
 }
 
-void pipe_add(Pipe &P) {
+void pipe_add(std::unordered_map<int, Pipe> &P) {
+    Pipe p;
     std::string name;
     int len, diameter, repair;
     std::cout << "Print pipe name" << std::endl;
@@ -95,12 +101,16 @@ void pipe_add(Pipe &P) {
     std::cin >> diameter;
     std::cout << "Print pipe repair status" << std::endl;
     std::cin >> repair;
-    if (repair == 1 || repair == 0) P.set(name, len, diameter, repair);
+    if (repair == 1 || repair == 0) {
+        p.set(name, len, diameter, repair);
+        P[p.get_id()] = p;
+    }
     else std::cout << "Error! Incorrect repair status, returning in main menu" << std::endl;
     return;
 }
 
-void cs_add(CS &comp_st) {
+void cs_add(std::unordered_map<int, CS> &comp_st) {
+    CS cs;
     std::string name;
     int workshop_count, working_workshop, station_class;
     std::cout << "Print CS name" << std::endl;
@@ -111,7 +121,21 @@ void cs_add(CS &comp_st) {
     std::cin >> working_workshop;
     std::cout << "Print CS station class" << std::endl;
     std::cin >> station_class;
-    comp_st.set(name, workshop_count, working_workshop, station_class);
+    cs.set(name, workshop_count, working_workshop, station_class);
+    comp_st[cs.get_id()] = cs;
+    return;
+}
+
+void pipe_info(std::unordered_map<int, Pipe> &P) {
+    for (const auto &p : P)
+        p.second.print_pipe_data();
+    return;
+}
+
+void cs_info(std::unordered_map<int, CS> &comp_st) {
+    for (const auto &cs : comp_st)
+        cs.second.print_cs_data();
+    return;
 }
 
 void process() {
@@ -119,12 +143,12 @@ void process() {
     std::unordered_map<int, CS> comp_st;
     int id;
     std::vector<std::pair<std::function<void()>, std::string>> actions = {
-        {[&P]() {pipe_add(P[]);}, "Create pipe"},
-        {[&P, id]() {P[id].print_pipe_data();}, "Print pipe info"},
-        {[&P]() {P[].repair_change();}, "Change repair status"},
-        {[&comp_st]() {cs_add(comp_st[]);}, "Create CS"},
-        {[&comp_st]() {comp_st[].print_cs_data();}, "Print CS info"},
-        {[&comp_st]() {tmp_mode_change(comp_st[]);}, "Change CS working workshops"},
+        {[&P]() {pipe_add(P);}, "Create pipe"},
+        {[&P]() {pipe_info(P);}, "Print pipe info"},
+        {[&P, id]() {P[id].repair_change();}, "Change repair status"},
+        {[&comp_st]() {cs_add(comp_st);}, "Create CS"},
+        {[&comp_st]() {cs_info(comp_st);}, "Print CS info"},
+        {[&comp_st, id]() {tmp_mode_change(comp_st[id]);}, "Change CS working workshops"},
         {[&P, &comp_st]() {save_into_file(P, comp_st);}, "Save"},
         {[&P, &comp_st]() {read_from_file(P, comp_st);}, "Load"},
     };
