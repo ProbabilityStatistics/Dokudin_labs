@@ -70,3 +70,16 @@ int CS::get_id() const {
 std::string CS::get_name() const {
     return name;
 }
+
+double CS::get_percent() const {
+    return working_workshop / workshop_count;
+}
+
+std::ostream& operator<<(std::ostream& os, const CS& comp_st) {
+    return os << "ID: " << comp_st.id
+        << ", name: " << comp_st.name 
+        << ", station class: " << comp_st.station_class 
+        << ", working workshops: " << comp_st.working_workshop 
+        << ", workshop count: " << comp_st.workshop_count
+        << std::endl;
+}

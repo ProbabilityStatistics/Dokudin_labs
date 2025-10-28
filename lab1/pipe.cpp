@@ -37,7 +37,8 @@ bool Pipe::isEmpty () const{
 
 void Pipe::pipe_save_into_file(std::ofstream &fout) const {
     fout << "Pipe" << std::endl;
-    fout << name << std::endl 
+    fout << id << std::endl 
+        << name << std::endl 
         << len << std::endl 
         << diameter << std::endl 
         << repair << std::endl;
@@ -62,4 +63,17 @@ int Pipe::get_id() const {
 
 std::string Pipe::get_name() const {
     return name;
+}
+
+int Pipe::get_repair() const {
+    return repair;
+}
+
+std::ostream& operator<<(std::ostream& os, const Pipe& P) {
+    return os << "ID: " << P.id
+        << ", name: " << P.name 
+        << ", len: " << P.len 
+        << ", diameter: " << P.diameter 
+        << ", repair status: "<< (P.repair ? "under repair" : "repaired")
+        << std::endl;
 }

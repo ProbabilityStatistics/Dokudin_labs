@@ -23,6 +23,8 @@ public:
     void set(std::string n, int count, int working, int st_cl);
     int get_id() const;
     std::string get_name() const;
+    double get_percent() const;
+    friend std::ostream& operator<<(std::ostream& os, const CS& P);
 };
 /*
 typedef struct CS {

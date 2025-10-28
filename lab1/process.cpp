@@ -78,7 +78,6 @@ void save_into_file(const std::unordered_map<int, Pipe> &P, const std::unordered
             cs.cs_save_into_file(fout);
         }
     }
-    
     return;
 }
 
@@ -149,13 +148,48 @@ void cs_add(std::unordered_map<int, CS> &comp_st) {
 
 void pipe_info(std::unordered_map<int, Pipe> &P) {
     for (const auto &p : P)
-        p.second.print_pipe_data();
+        std::cout << p.second;
     return;
 }
 
 void cs_info(std::unordered_map<int, CS> &comp_st) {
     for (const auto &cs : comp_st)
-        cs.second.print_cs_data();
+        std::cout << cs.second;
+    return;
+}
+
+void filters(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st) {
+    int filter;
+    std::cin >> filter; //!!!!    
+    if (filter == 1) {
+        std::string name;
+        std::cout << "Enter the pipe name" << std::endl;
+        std::cin >> name;
+        for (const auto &p : P) {
+            if (p.second.get_name() == name) std::cout << p.second;
+        }
+    } else if (filter == 2) {
+        int repair;        
+        std::cin >> repair; //!!!!
+        for (const auto &p : P) {
+            if (p.second.get_repair() == repair) std::cout << p.second;
+        }
+    } else if (filter == 3) {
+        std::string name;
+        std::cout << "Enter the cs name" << std::endl;
+        std::cin >> name;
+        for (const auto &cs : comp_st) {
+            if (cs.second.get_name() == name) std::cout << cs.second;
+        }
+    } else if (filter == 4) {
+        double percent;
+        std::cin >> percent; //!!!!
+        for (const auto &cs : comp_st) {
+            if (cs.second.get_percent() == percent) std::cout << cs.second;
+        }
+    } else {
+        std::cout << "Error! Incorret input, returning to main menu" << std::endl;
+    }
     return;
 }
 

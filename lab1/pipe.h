@@ -23,7 +23,11 @@ public:
     void set(std::string n, int l, int d, bool r);
     int get_id() const;
     std::string get_name() const;
+    int get_repair() const;
+    friend std::ostream& operator<<(std::ostream& os, const Pipe& P);
 };
+
+#endif
 /*
 typedef struct Pipe {
     std::string name;
@@ -40,4 +44,3 @@ bool isEmpty (const Pipe &P);
 void pipe_save_into_file(const Pipe &P, std::ofstream &fout);
 Pipe pipe_read_from_file(std::ifstream &fin);
 */
-#endif

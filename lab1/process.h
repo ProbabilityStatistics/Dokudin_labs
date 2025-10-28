@@ -16,5 +16,6 @@ void pipe_add(std::unordered_map<int, Pipe> &P);
 void cs_add(std::unordered_map<int, CS> &comp_st);
 void pipe_info(std::unordered_map<int, Pipe> &P);
 void cs_info(std::unordered_map<int, CS> &comp_st);
+void filters(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st);
 
 #endif
