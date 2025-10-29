@@ -3,6 +3,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <vector>
 #include "pipe.h"
 #include "compressor_station.h"
 
@@ -19,5 +20,11 @@ void cs_info(std::unordered_map<int, CS> &comp_st);
 std::vector<int> filters(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st);
 int parse_filter();
 int check_num();
+std::vector<int> enter_id();
+void pipe_edit(std::unordered_map<int, Pipe> &P, std::vector<int> &ids);
+void pipe_delete(std::unordered_map<int, Pipe> &P, std::vector<int> &ids);
+void cs_edit(std::unordered_map<int, CS> &comp_st, std::vector<int> &ids, bool mode);
+void cs_delete(std::unordered_map<int, CS> &comp_st, std::vector<int> &ids);
+void edit(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st);
 
 #endif

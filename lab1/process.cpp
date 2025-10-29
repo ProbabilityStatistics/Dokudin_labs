@@ -13,7 +13,7 @@
 int main_menu() {
     std::cout << "Menu" << std::endl;
     std::vector <std::string> operations = {"Add new pipe", "Print pipes info", "Change repair status",
-                "Add new CS", "Print CSs info", "Change CS working workshops", "Save", "Load", "Exit"};
+                "Add new CS", "Print CSs info", "Change CS working workshops", "Filter", "Edit", "Save", "Load", "Exit"};
     for (int i = 0; i < (int) operations.size(); i++) {
         std::cout << i + 1 << ". " << operations[i] << std::endl;
     }
@@ -133,7 +133,7 @@ void pipe_add(std::unordered_map<int, Pipe> &P) {
     diameter = check_num();
     std::cout << "Print pipe repair status" << std::endl;
     repair = check_num();
-    if (repair == 1 || repair == 0 && len > -1 && diameter > -1) {
+    if ((repair == 1 || repair == 0) && len > -1 && diameter > -1) {
         p.set(name, len, diameter, repair);
         P.emplace(p.get_id(), std::move(p));
     } else std::cout << "Error! Incorrect input, returning in main menu" << std::endl;
@@ -239,7 +239,8 @@ std::vector<int> filters(std::unordered_map<int, Pipe> &P, std::unordered_map<in
         }
     } else {
         std::cout << "Error! Incorret input, returning to main menu" << std::endl;
-        return;
+        id.push_back(-3);
+        return id;
     }
     return id;
 }
@@ -272,7 +273,7 @@ std::vector<int> enter_id() {
 }
 
 void pipe_edit(std::unordered_map<int, Pipe> &P, std::vector<int> &ids) {
-    for (int i = 1; i < ids.size(); i++) {
+    for (int i = 1; i < (int) ids.size(); i++) {
         if (auto search = P.find(ids[i]); search != P.end()) {
             P[ids[i]].repair_change();
         }
@@ -281,7 +282,7 @@ void pipe_edit(std::unordered_map<int, Pipe> &P, std::vector<int> &ids) {
 }
 
 void pipe_delete(std::unordered_map<int, Pipe> &P, std::vector<int> &ids) {
-    for (int i = 1; i < ids.size(); i++) {
+    for (int i = 1; i < (int) ids.size(); i++) {
         if (auto search = P.find(ids[i]); search != P.end()) {
             P.erase(search);
         }
@@ -290,7 +291,7 @@ void pipe_delete(std::unordered_map<int, Pipe> &P, std::vector<int> &ids) {
 }
 
 void cs_edit(std::unordered_map<int, CS> &comp_st, std::vector<int> &ids, bool mode) {
-    for (int i = 1; i < ids.size(); i++) {
+    for (int i = 1; i < (int) ids.size(); i++) {
         if (auto search = comp_st.find(ids[i]); search != comp_st.end()) {
             comp_st[ids[i]].mode_change(mode);
         }
@@ -299,7 +300,7 @@ void cs_edit(std::unordered_map<int, CS> &comp_st, std::vector<int> &ids, bool m
 }
 
 void cs_delete(std::unordered_map<int, CS> &comp_st, std::vector<int> &ids) {
-    for (int i = 1; i < ids.size(); i++) {
+    for (int i = 1; i < (int) ids.size(); i++) {
         if (auto search = comp_st.find(ids[i]); search != comp_st.end()) {
             comp_st.erase(search);
         }
@@ -355,6 +356,8 @@ void process() {
         {[&comp_st]() {cs_add(comp_st);}, "Create CS"},
         {[&comp_st]() {cs_info(comp_st);}, "Print CS info"},
         {[&comp_st]() {tmp_mode_change(comp_st);}, "Change CS working workshops"},
+        {[&P, &comp_st]() {filters(P, comp_st);}, "Filter"},
+        {[&P, &comp_st]() {edit(P, comp_st);}, "Edit"},
         {[&P, &comp_st]() {save_into_file(P, comp_st);}, "Save"},
         {[&P, &comp_st]() {read_from_file(P, comp_st);}, "Load"},
     };

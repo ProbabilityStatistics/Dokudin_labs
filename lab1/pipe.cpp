@@ -37,8 +37,7 @@ bool Pipe::isEmpty () const{
 
 void Pipe::pipe_save_into_file(std::ofstream &fout) const {
     fout << "Pipe" << std::endl;
-    fout << id << std::endl 
-        << name << std::endl 
+    fout << name << std::endl 
         << len << std::endl 
         << diameter << std::endl 
         << repair << std::endl;
