@@ -7,7 +7,7 @@
 class Pipe {
 private:
     std::string name;
-    int len;
+    double len;
     int diameter;
     bool repair;
     int id;
@@ -20,7 +20,7 @@ public:
     bool isEmpty() const;
     void pipe_save_into_file(std::ofstream &fout) const;
     void pipe_read_from_file(std::ifstream &fin);
-    void set(std::string n, int l, int d, bool r);
+    void set(std::string n, double l, int d, bool r);//!!!
     int get_id() const;
     std::string get_name() const;
     int get_repair() const;

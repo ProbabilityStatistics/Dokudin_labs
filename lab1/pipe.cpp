@@ -37,19 +37,20 @@ bool Pipe::isEmpty () const{
 
 void Pipe::pipe_save_into_file(std::ofstream &fout) const {
     fout << "Pipe" << std::endl;
-    fout << name << std::endl 
+    fout << id << std::endl 
+        << name << std::endl 
         << len << std::endl 
         << diameter << std::endl 
         << repair << std::endl;
 }
 
 void Pipe::pipe_read_from_file(std::ifstream &fin) {
-    std::getline(fin, name);
+    std::getline(fin>>std::ws, name);
     fin >> len >> diameter >> repair;
     return;
 }
 
-void Pipe::set(std::string n, int l, int d, bool r) {
+void Pipe::set(std::string n, double l, int d, bool r) {
     name = n;
     len = l;
     diameter = d;

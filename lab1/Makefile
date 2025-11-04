@@ -1,9 +1,10 @@
 CC=g++
-CFLAGS=-Wextra -Werror -Wall
+CFLAGS=-Wextra -Werror -Wall -std=c++20
+LDFLAGS = -lfmt
 all: main
 
 main: pipe.o compressor_station.o process.o main.cpp
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 pipe.o: pipe.cpp
 	$(CC) $(CFLAGS) -c -o $@ $<

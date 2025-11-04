@@ -51,7 +51,7 @@ void CS::cs_save_into_file(std::ofstream &fout) const {
 }
 
 void CS::cs_read_from_file(std::ifstream &fin) {
-    std::getline(fin, name);
+    std::getline(fin>>std::ws, name);
     fin >> workshop_count >> working_workshop >> station_class;
     return;
 }

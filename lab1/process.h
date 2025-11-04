@@ -4,8 +4,26 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <fstream>
 #include "pipe.h"
 #include "compressor_station.h"
+
+class redirect_output_wrapper // https://github.com/papilinatm/cpp_lessons_2020/blob/master/cpp_lessons/utils.h
+{
+private:
+    std::ostream &stream;
+    std::streambuf *const old_buf;
+public:
+    redirect_output_wrapper(std::ostream &src)
+        : stream(src), old_buf(src.rdbuf()) {
+    }
+    ~redirect_output_wrapper() {
+        stream.rdbuf(old_buf);
+    }
+    void redirect(const std::ostream &dest) const {
+        stream.rdbuf(dest.rdbuf());
+    }
+};
 
 void process();
 int main_menu();
@@ -20,6 +38,7 @@ void cs_info(std::unordered_map<int, CS> &comp_st);
 std::vector<int> filters(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st);
 int parse_filter();
 int check_num();
+double check_double();
 std::vector<int> enter_id();
 void pipe_edit(std::unordered_map<int, Pipe> &P, std::vector<int> &ids);
 void pipe_delete(std::unordered_map<int, Pipe> &P, std::vector<int> &ids);

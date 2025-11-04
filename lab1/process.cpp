@@ -9,25 +9,23 @@
 #include <functional>
 #include <limits>
 #include <fstream>
+#include <chrono>
+#include <fmt/chrono.h> // sudo apt install libfmt-dev
+#include <fmt/format.h>
 
 int main_menu() {
     std::cout << "Menu" << std::endl;
     std::vector <std::string> operations = {"Add new pipe", "Print pipes info", "Change repair status",
-                "Add new CS", "Print CSs info", "Change CS working workshops", "Filter", "Edit", "Save", "Load", "Exit"};
+                "Add new CS", "Print CSs info", "Change CS working workshops", "Find", "Edit", "Save", "Load", "Exit"};
     for (int i = 0; i < (int) operations.size(); i++) {
         std::cout << i + 1 << ". " << operations[i] << std::endl;
     }
     std::cout << "Enter the menu number" << std::endl;
     std::string str;
-    try {
-        std::cin >> str;
-        int n = std::stoi(str);
-        if (n <= (int) operations.size() && n >= 1) {
-            return n - 1;
-        } else {
-            return -1;
-        }
-    } catch (...) {
+    int n = check_num();
+    if (n <= (int) operations.size() && n >= 1) {
+        return n - 1;
+    } else {
         return -1;
     }
 }
@@ -37,7 +35,21 @@ int check_num() {
     int n;
     try {
         std::cin >> str;
+        std::cerr << str << std::endl;
         n = std::stoi(str);
+    } catch (...) {
+        return -1;
+    }
+    return n;
+}
+
+double check_double() {
+    std::string str;
+    int n;
+    try {
+        std::cin >> str;
+        std::cerr << str << std::endl;
+        n = std::stod(str);
     } catch (...) {
         return -1;
     }
@@ -48,7 +60,7 @@ void tmp_repair_change(std::unordered_map<int, Pipe> &P) {
     int id;
     std::cout << "Enter pipe ID" << std::endl;
     id = check_num();
-    if (auto search = P.find(id); search != P.end()) {
+    if (P.contains(id)) {
         P[id].repair_change();
     } else {
         std::cout << "Error! The CS with this ID was not found" << std::endl;
@@ -61,7 +73,7 @@ void tmp_mode_change(std::unordered_map<int, CS> &comp_st) {
     int mode;
     std::cout << "Enter compressor station ID" << std::endl;
     id = check_num();
-    if (auto search = comp_st.find(id); search != comp_st.end()) {
+    if (comp_st.contains(id)) {
         std::cout << "Enter" << std::endl << "1. Turn on" << std::endl << "2. Turn off" << std::endl;
         mode = check_num();
         if (mode == 1 || mode == 2) {
@@ -79,16 +91,13 @@ void save_into_file(const std::unordered_map<int, Pipe> &P, const std::unordered
     std::string filename;
     std::cout << "Enter filename" << std::endl;
     std::getline(std::cin>>std::ws, filename);
+    std::cerr << filename << std::endl;
     std::ofstream fout(filename);
     for (const auto &[id, p] : P) {
-        if (!p.isEmpty()) {
-            p.pipe_save_into_file(fout);
-        }
+        p.pipe_save_into_file(fout);
     }
     for (const auto &[id, cs] : comp_st) {
-        if (!cs.isEmpty()) {
-            cs.cs_save_into_file(fout);
-        }
+        cs.cs_save_into_file(fout);
     }
     return;
 }
@@ -97,19 +106,35 @@ void read_from_file(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS
     std::string filename;
     std::cout << "Enter filename" << std::endl;
     std::getline(std::cin>>std::ws, filename);
+    std::cerr << filename << std::endl;
     std::ifstream fin(filename);
     if (fin.is_open()) {
         std::string struct_type;
-        while (std::getline(fin, struct_type)) {
+        while (std::getline(fin>>std::ws, struct_type)) {
             if (struct_type == "Pipe") {
-                Pipe p;
-                p.pipe_read_from_file(fin);
-                P[p.get_id()] = p;
+                int id;
+                fin >> id;
+                if (P.contains(id)) {
+                    P[id].pipe_read_from_file(fin);
+                } else {
+                    Pipe p;
+                    p.pipe_read_from_file(fin);
+                    P.emplace(p.get_id(), std::move(p));
+                }
             }
             else if (struct_type == "CS") {
+                int id;
+                fin >> id;
+                if (comp_st.contains(id)) {
+                    comp_st[id].cs_read_from_file(fin);
+                } else {
+                    CS cs;
+                    cs.cs_read_from_file(fin);
+                    comp_st.emplace(cs.get_id(), cs);
+                }
                 CS cs;
                 cs.cs_read_from_file(fin);
-                comp_st[cs.get_id()] = cs;
+                comp_st.emplace(cs.get_id(), cs);
             }
             else {
                 std::cout << "Error! Something went wrong while reading the file";
@@ -127,8 +152,9 @@ void pipe_add(std::unordered_map<int, Pipe> &P) {
     int len, diameter, repair;
     std::cout << "Print pipe name" << std::endl;
     std::getline(std::cin>>std::ws, name);
+    std::cerr << name << std::endl;
     std::cout << "Print pipe lenght" << std::endl;
-    len = check_num();
+    len = check_double();
     std::cout << "Print pipe diameter" << std::endl;
     diameter = check_num();
     std::cout << "Print pipe repair status" << std::endl;
@@ -146,6 +172,7 @@ void cs_add(std::unordered_map<int, CS> &comp_st) {
     int workshop_count, working_workshop, station_class;
     std::cout << "Print CS name" << std::endl;
     std::getline(std::cin>>std::ws, name);
+    std::cerr << name << std::endl;
     std::cout << "Print CS workshops count" << std::endl;
     workshop_count = check_num();
     std::cout << "Print CS number of working workshops" << std::endl;
@@ -199,7 +226,8 @@ std::vector<int> filters(std::unordered_map<int, Pipe> &P, std::unordered_map<in
         id.push_back(-1);
         std::string name;
         std::cout << "Enter the pipe name: " << std::endl;
-        std::cin >> name;
+        std::getline(std::cin>>std::ws, name);
+        std::cerr << name << std::endl;
         for (const auto &p : P) {
             if (p.second.get_name() == name) {
                 id.push_back(p.first);
@@ -220,7 +248,8 @@ std::vector<int> filters(std::unordered_map<int, Pipe> &P, std::unordered_map<in
         id.push_back(-2);
         std::string name;
         std::cout << "Enter the cs name: " << std::endl;
-        std::cin >> name;
+        std::getline(std::cin>>std::ws, name);
+        std::cerr << name << std::endl;
         for (const auto &cs : comp_st) {
             if (cs.second.get_name() == name) {
                 id.push_back(cs.first);
@@ -230,7 +259,7 @@ std::vector<int> filters(std::unordered_map<int, Pipe> &P, std::unordered_map<in
     } else if (filter == 4) {
         id.push_back(-2);
         double percent;
-        std::cin >> percent; //!!!!
+        percent = check_double();
         for (const auto &cs : comp_st) {
             if (cs.second.get_percent() == percent) {
                 id.push_back(cs.first);
@@ -263,11 +292,11 @@ std::vector<int> enter_id() {
             std::cout << "Error! Incorrect input, try again" << std::endl;
         }
     }
-    std::cout << "Enter the IDs, to stop enter -1: " << std::endl;
-    while (id != -1) {
+    std::cout << "Enter the IDs, to stop enter 0: " << std::endl;
+    while (id != 0) {
         id = check_num();
-        if (id > -1) ids.push_back(id);
-        else std::cout << "ID must be >= 1, try again" << std::endl;
+        if (id > 0) ids.push_back(id);
+        else if (id != 0) std::cout << "ID must be >= 1, try again" << std::endl;
     }
     return ids;
 }
@@ -347,6 +376,11 @@ void edit(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st
 }
 
 void process() {
+    redirect_output_wrapper cerr_out(std::cerr);
+    const std::string time = fmt::format("{:%d_%m_%Y %H_%M_%OS}", std::chrono::system_clock::now());
+    std::ofstream logfile("logs/log_" + time);
+    if (logfile)
+        cerr_out.redirect(logfile);
     std::unordered_map<int, Pipe> P;
     std::unordered_map<int, CS> comp_st;
     std::vector<std::pair<std::function<void()>, std::string>> actions = {
@@ -356,7 +390,7 @@ void process() {
         {[&comp_st]() {cs_add(comp_st);}, "Create CS"},
         {[&comp_st]() {cs_info(comp_st);}, "Print CS info"},
         {[&comp_st]() {tmp_mode_change(comp_st);}, "Change CS working workshops"},
-        {[&P, &comp_st]() {filters(P, comp_st);}, "Filter"},
+        {[&P, &comp_st]() {filters(P, comp_st);}, "Find"},
         {[&P, &comp_st]() {edit(P, comp_st);}, "Edit"},
         {[&P, &comp_st]() {save_into_file(P, comp_st);}, "Save"},
         {[&P, &comp_st]() {read_from_file(P, comp_st);}, "Load"},
