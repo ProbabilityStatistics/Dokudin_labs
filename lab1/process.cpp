@@ -93,11 +93,16 @@ void save_into_file(const std::unordered_map<int, Pipe> &P, const std::unordered
     std::getline(std::cin>>std::ws, filename);
     std::cerr << filename << std::endl;
     std::ofstream fout(filename);
-    for (const auto &[id, p] : P) {
-        p.pipe_save_into_file(fout);
-    }
-    for (const auto &[id, cs] : comp_st) {
-        cs.cs_save_into_file(fout);
+    if (fout.is_open()) {
+        for (const auto &[id, p] : P) {
+            p.pipe_save_into_file(fout);
+        }
+        for (const auto &[id, cs] : comp_st) {
+            cs.cs_save_into_file(fout);
+        }
+        fout.close();
+    } else {
+        std::cout << "Error! Cannot open file, returning to main menu" << std::endl;
     }
     return;
 }
@@ -140,6 +145,7 @@ void read_from_file(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS
                 std::cout << "Error! Something went wrong while reading the file";
             }
         }
+        fin.close();
     } else {
         std::cout << "Error! Cannot open file" << std::endl;
     }
@@ -303,7 +309,7 @@ std::vector<int> enter_id() {
 
 void pipe_edit(std::unordered_map<int, Pipe> &P, std::vector<int> &ids) {
     for (int i = 1; i < (int) ids.size(); i++) {
-        if (auto search = P.find(ids[i]); search != P.end()) {
+        if (P.contains(ids[i])) {
             P[ids[i]].repair_change();
         }
     }
@@ -312,8 +318,8 @@ void pipe_edit(std::unordered_map<int, Pipe> &P, std::vector<int> &ids) {
 
 void pipe_delete(std::unordered_map<int, Pipe> &P, std::vector<int> &ids) {
     for (int i = 1; i < (int) ids.size(); i++) {
-        if (auto search = P.find(ids[i]); search != P.end()) {
-            P.erase(search);
+        if (P.contains(ids[i])) {
+            P.erase(ids[i]);
         }
     }
     return;
@@ -321,7 +327,7 @@ void pipe_delete(std::unordered_map<int, Pipe> &P, std::vector<int> &ids) {
 
 void cs_edit(std::unordered_map<int, CS> &comp_st, std::vector<int> &ids, bool mode) {
     for (int i = 1; i < (int) ids.size(); i++) {
-        if (auto search = comp_st.find(ids[i]); search != comp_st.end()) {
+        if (comp_st.contains(ids[i])) {
             comp_st[ids[i]].mode_change(mode);
         }
     }
@@ -330,8 +336,8 @@ void cs_edit(std::unordered_map<int, CS> &comp_st, std::vector<int> &ids, bool m
 
 void cs_delete(std::unordered_map<int, CS> &comp_st, std::vector<int> &ids) {
     for (int i = 1; i < (int) ids.size(); i++) {
-        if (auto search = comp_st.find(ids[i]); search != comp_st.end()) {
-            comp_st.erase(search);
+        if (comp_st.contains(ids[i])) {
+            comp_st.erase(ids[i]);
         }
     }
     return;
@@ -410,5 +416,6 @@ void process() {
         std::cin.clear();
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
+    logfile.close();
     return ;
 }
