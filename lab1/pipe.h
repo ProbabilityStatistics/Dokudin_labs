@@ -14,6 +14,7 @@ private:
     static std::atomic<int> next_id;
 public:
     Pipe();
+    Pipe(std::string n, double l, int d, bool r);
     ~Pipe();
     void print_pipe_data() const;
     void repair_change();

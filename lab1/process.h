@@ -27,18 +27,19 @@ public:
 
 void process();
 int main_menu();
-void tmp_repair_change(std::unordered_map<int, Pipe> &P);
-void tmp_mode_change(std::unordered_map<int, CS> &comp_st);
+void execute_repair_change(std::unordered_map<int, Pipe> &P);
+void execute_mode_change(std::unordered_map<int, CS> &comp_st);
 void save_into_file(const std::unordered_map<int, Pipe> &P, const std::unordered_map<int, CS> &comp_st);
 void read_from_file(Pipe &P, CS &comp_st);
 void pipe_add(std::unordered_map<int, Pipe> &P);
 void cs_add(std::unordered_map<int, CS> &comp_st);
-void pipe_info(std::unordered_map<int, Pipe> &P);
-void cs_info(std::unordered_map<int, CS> &comp_st);
+void pipe_info(const std::unordered_map<int, Pipe> &P);
+void cs_info(const std::unordered_map<int, CS> &comp_st);
 std::vector<int> filters(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st);
 int parse_filter();
-int check_num();
-double check_double();
+int get_num();
+std::string get_str();
+double get_double();
 std::vector<int> enter_id();
 void pipe_edit(std::unordered_map<int, Pipe> &P, std::vector<int> &ids);
 void pipe_delete(std::unordered_map<int, Pipe> &P, std::vector<int> &ids);

@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <string>
 
 std::atomic<int> CS::next_id{0};
 
@@ -11,6 +12,10 @@ CS::CS() {
     station_class = 0;
     working_workshop = 0;
     workshop_count = -1;
+}
+
+CS::CS(std::string n, int count, int working, int st_cl) : name{n}, workshop_count{count}, working_workshop{working}, station_class{st_cl} {
+    id = CS::next_id.fetch_add(1, std::memory_order_relaxed);
 }
 
 CS::~CS() {}
@@ -57,7 +62,7 @@ void CS::cs_read_from_file(std::ifstream &fin) {
 }
 
 void CS::set(std::string n, int count, int working, int st_cl) {
-    name = name;
+    name = n;
     station_class = st_cl;
     working_workshop = working;
     workshop_count = count;

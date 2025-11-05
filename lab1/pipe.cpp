@@ -13,6 +13,10 @@ Pipe::Pipe() {
     repair = 0;
 }
 
+Pipe::Pipe(std::string n, double l, int d, bool r) : name{n}, len{l}, diameter{d}, repair{r} {
+    id = Pipe::next_id.fetch_add(1, std::memory_order_relaxed);
+}
+
 Pipe::~Pipe() {}
 
 void Pipe::print_pipe_data() const{

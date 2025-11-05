@@ -14,6 +14,7 @@ private:
     static std::atomic<int> next_id;
 public:
     CS();
+    CS(std::string n, int count, int working, int st_cl);
     ~CS();
     void print_cs_data() const;
     void mode_change(bool mode);

@@ -22,7 +22,7 @@ int main_menu() {
     }
     std::cout << "Enter the menu number" << std::endl;
     std::string str;
-    int n = check_num();
+    int n = get_num();
     if (n <= (int) operations.size() && n >= 1) {
         return n - 1;
     } else {
@@ -30,36 +30,53 @@ int main_menu() {
     }
 }
 
-int check_num() {
+int get_num() {
     std::string str;
     int n;
-    try {
-        std::cin >> str;
-        std::cerr << str << std::endl;
-        n = std::stoi(str);
-    } catch (...) {
-        return -1;
+    bool flag = 1;
+    while (flag) {
+        try {
+            std::cin >> str;
+            std::cerr << str << std::endl;
+            n = std::stoi(str);
+            flag = 0;
+        } catch (...) {
+            flag = 1;
+            std::cout << "Error! Incorrect input, try again" << std::endl;
+        }
     }
     return n;
 }
 
-double check_double() {
+std::string get_str() {
     std::string str;
-    int n;
-    try {
-        std::cin >> str;
-        std::cerr << str << std::endl;
-        n = std::stod(str);
-    } catch (...) {
-        return -1;
+    std::getline(std::cin>>std::ws, str);
+    std::cerr << str << std::endl;
+    return str;
+}
+
+double get_double() {
+    std::string str;
+    double n;
+    bool flag = 1;
+    while (flag) {
+        try {
+            std::cin >> str;
+            std::cerr << str << std::endl;
+            n = std::stod(str);
+            flag = 0;
+        } catch (...) {
+            flag = 1;
+            std::cout << "Error! Incorrect input, try again" << std::endl;
+        }
     }
     return n;
 }
 
-void tmp_repair_change(std::unordered_map<int, Pipe> &P) {
+void execute_repair_change(std::unordered_map<int, Pipe> &P) {
     int id;
     std::cout << "Enter pipe ID" << std::endl;
-    id = check_num();
+    id = get_num();
     if (P.contains(id)) {
         P[id].repair_change();
     } else {
@@ -68,14 +85,14 @@ void tmp_repair_change(std::unordered_map<int, Pipe> &P) {
     return;
 }
 
-void tmp_mode_change(std::unordered_map<int, CS> &comp_st) {
+void execute_mode_change(std::unordered_map<int, CS> &comp_st) {
     int id;
     int mode;
     std::cout << "Enter compressor station ID" << std::endl;
-    id = check_num();
+    id = get_num();
     if (comp_st.contains(id)) {
         std::cout << "Enter" << std::endl << "1. Turn on" << std::endl << "2. Turn off" << std::endl;
-        mode = check_num();
+        mode = get_num();
         if (mode == 1 || mode == 2) {
             comp_st[id].mode_change(mode);
         } else {
@@ -90,8 +107,7 @@ void tmp_mode_change(std::unordered_map<int, CS> &comp_st) {
 void save_into_file(const std::unordered_map<int, Pipe> &P, const std::unordered_map<int, CS> &comp_st) {
     std::string filename;
     std::cout << "Enter filename" << std::endl;
-    std::getline(std::cin>>std::ws, filename);
-    std::cerr << filename << std::endl;
+    filename = get_str();
     std::ofstream fout(filename);
     if (fout.is_open()) {
         for (const auto &[id, p] : P) {
@@ -110,8 +126,7 @@ void save_into_file(const std::unordered_map<int, Pipe> &P, const std::unordered
 void read_from_file(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st) {
     std::string filename;
     std::cout << "Enter filename" << std::endl;
-    std::getline(std::cin>>std::ws, filename);
-    std::cerr << filename << std::endl;
+    filename = get_str();
     std::ifstream fin(filename);
     if (fin.is_open()) {
         std::string struct_type;
@@ -142,7 +157,7 @@ void read_from_file(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS
                 comp_st.emplace(cs.get_id(), cs);
             }
             else {
-                std::cout << "Error! Something went wrong while reading the file";
+                std::cout << "Error! Something went wrong while reading the file" << std::endl;
             }
         }
         fin.close();
@@ -152,41 +167,37 @@ void read_from_file(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS
     return;
 }
 
-void pipe_add(std::unordered_map<int, Pipe> &P) {
-    Pipe p;
+void pipe_add(std::unordered_map<int, Pipe> &P) { //!!!!
     std::string name;
     int len, diameter, repair;
     std::cout << "Print pipe name" << std::endl;
-    std::getline(std::cin>>std::ws, name);
-    std::cerr << name << std::endl;
+    name = get_str();
     std::cout << "Print pipe lenght" << std::endl;
-    len = check_double();
+    len = get_double();
     std::cout << "Print pipe diameter" << std::endl;
-    diameter = check_num();
+    diameter = get_num();
     std::cout << "Print pipe repair status" << std::endl;
-    repair = check_num();
+    repair = get_num();
     if ((repair == 1 || repair == 0) && len > -1 && diameter > -1) {
-        p.set(name, len, diameter, repair);
+        Pipe p(name, len, diameter, repair);
         P.emplace(p.get_id(), std::move(p));
     } else std::cout << "Error! Incorrect input, returning in main menu" << std::endl;
     return;
 }
 
-void cs_add(std::unordered_map<int, CS> &comp_st) {
-    CS cs;
+void cs_add(std::unordered_map<int, CS> &comp_st) { //!!!!
     std::string name;
     int workshop_count, working_workshop, station_class;
     std::cout << "Print CS name" << std::endl;
-    std::getline(std::cin>>std::ws, name);
-    std::cerr << name << std::endl;
+    name = get_str();
     std::cout << "Print CS workshops count" << std::endl;
-    workshop_count = check_num();
+    workshop_count = get_num();
     std::cout << "Print CS number of working workshops" << std::endl;
-    working_workshop = check_num();
+    working_workshop = get_num();
     std::cout << "Print CS station class" << std::endl;
-    station_class = check_num();
+    station_class = get_num();
     if (working_workshop > -1 && workshop_count > -1 && station_class > -1) {
-        cs.set(name, workshop_count, working_workshop, station_class);
+        CS cs(name, workshop_count, working_workshop, station_class);
         comp_st.emplace(cs.get_id(), std::move(cs));
     } else {
         std::cout << "Error! Incorrect input, returning in main menu" << std::endl;
@@ -194,48 +205,47 @@ void cs_add(std::unordered_map<int, CS> &comp_st) {
     return;
 }
 
-void pipe_info(std::unordered_map<int, Pipe> &P) {
+void pipe_info(const std::unordered_map<int, Pipe> &P) {
     for (const auto &p : P)
         std::cout << p.second;
     return;
 }
 
-void cs_info(std::unordered_map<int, CS> &comp_st) {
+void cs_info(const std::unordered_map<int, CS> &comp_st) {
     for (const auto &cs : comp_st)
         std::cout << cs.second;
     return;
 }
 
-int parse_filter() {
+int choose_filter() {
     std::string str;
     int struct_type, filter, ans = 0;
     std::cout << "Enter: " << std::endl
         << "1. Pipe" << std::endl
         << "2. CS" << std::endl;
-    struct_type = check_num();
+    struct_type = get_num();
     if (struct_type < 1 || struct_type > 2) return -1;
     std::cout << "Enter: " << std::endl
         << "1. Filter by name" << std::endl
         << "2. Filter by parameter" << std::endl;
-    filter = check_num();
+    filter = get_num();
     if (filter < 1 || filter > 2) return -1;
     if (struct_type == 1) ans = filter;
     else if (struct_type == 2) ans = filter + 2;
     return ans;
 }
 
-std::vector<int> filters(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st) {
+std::vector<int> filters(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st) { //!!!! lambda func?
     int filter;
     std::vector<int> id;
-    filter = parse_filter();    
+    filter = choose_filter();    
     if (filter == 1) {
         id.push_back(-1);
         std::string name;
         std::cout << "Enter the pipe name: " << std::endl;
-        std::getline(std::cin>>std::ws, name);
-        std::cerr << name << std::endl;
+        name = get_str();
         for (const auto &p : P) {
-            if (p.second.get_name() == name) {
+            if (p.second.get_name().find(name) != std::string::npos) {
                 id.push_back(p.first);
                 std::cout << p.second;
             }
@@ -243,7 +253,7 @@ std::vector<int> filters(std::unordered_map<int, Pipe> &P, std::unordered_map<in
     } else if (filter == 2) {
         id.push_back(-1);
         int repair;        
-        repair = check_num();
+        repair = get_num();
         for (const auto &p : P) {
             if (p.second.get_repair() == repair) {
                 id.push_back(p.first);
@@ -254,10 +264,9 @@ std::vector<int> filters(std::unordered_map<int, Pipe> &P, std::unordered_map<in
         id.push_back(-2);
         std::string name;
         std::cout << "Enter the cs name: " << std::endl;
-        std::getline(std::cin>>std::ws, name);
-        std::cerr << name << std::endl;
+        name = get_str();
         for (const auto &cs : comp_st) {
-            if (cs.second.get_name() == name) {
+            if (cs.second.get_name().find(name) != std::string::npos) {
                 id.push_back(cs.first);
                 std::cout << cs.second;
             }
@@ -265,7 +274,7 @@ std::vector<int> filters(std::unordered_map<int, Pipe> &P, std::unordered_map<in
     } else if (filter == 4) {
         id.push_back(-2);
         double percent;
-        percent = check_double();
+        percent = get_double();
         for (const auto &cs : comp_st) {
             if (cs.second.get_percent() == percent) {
                 id.push_back(cs.first);
@@ -281,13 +290,13 @@ std::vector<int> filters(std::unordered_map<int, Pipe> &P, std::unordered_map<in
 }
 
 std::vector<int> enter_id() {
-    int id = 0, struct_type, flag = 1;
+    int id = -1, struct_type, flag = 1;
     std::vector<int> ids;
     while (flag) {
         std::cout << "Which struct?" << std::endl
             << "1. Pipe" << std::endl
             << "2. CS" << std::endl;
-        struct_type = check_num();
+        struct_type = get_num();
         if (struct_type == 1) {
             ids.push_back(-1);
             flag = 0;
@@ -300,7 +309,7 @@ std::vector<int> enter_id() {
     }
     std::cout << "Enter the IDs, to stop enter 0: " << std::endl;
     while (id != 0) {
-        id = check_num();
+        id = get_num();
         if (id > 0) ids.push_back(id);
         else if (id != 0) std::cout << "ID must be >= 1, try again" << std::endl;
     }
@@ -347,7 +356,7 @@ void edit(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st
     std::cout << "Enter:" << std::endl
         << "1. Sort by filter" << std::endl
         << "2. Sort by IDs" << std::endl;
-    int type = check_num();
+    int type = get_num();
     std::vector<int> ids;
     if (type == 1) {
         ids = filters(P, comp_st);
@@ -360,7 +369,7 @@ void edit(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st
     std::cout << "Enter:" << std::endl
         << "1. Change" << std::endl
         << "2. Delete" << std::endl;
-    int mode = check_num();
+    int mode = get_num();
     if (mode == 1 && ids[0] == -1) {
         pipe_edit(P, ids);
     } else if (mode == 1 && ids[0] == -2) {
@@ -368,7 +377,7 @@ void edit(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st
         std::cout << "Enter:" << std::endl
             << "1. Turn on" << std::endl
             << "2. Turn off" << std::endl;
-        mode = check_num();
+        mode = get_num();
         if (mode == 1 || mode == 0) cs_edit(comp_st, ids, mode);
         else std::cout << "Error! Incorrect mode, returning to main menu" << std::endl;
     } else if (mode == 2 && ids[0] == -1) {
@@ -392,10 +401,10 @@ void process() {
     std::vector<std::pair<std::function<void()>, std::string>> actions = {
         {[&P]() {pipe_add(P);}, "Create pipe"},
         {[&P]() {pipe_info(P);}, "Print pipe info"},
-        {[&P]() {tmp_repair_change(P);}, "Change repair status"},
+        {[&P]() {execute_repair_change(P);}, "Change repair status"},
         {[&comp_st]() {cs_add(comp_st);}, "Create CS"},
         {[&comp_st]() {cs_info(comp_st);}, "Print CS info"},
-        {[&comp_st]() {tmp_mode_change(comp_st);}, "Change CS working workshops"},
+        {[&comp_st]() {execute_mode_change(comp_st);}, "Change CS working workshops"},
         {[&P, &comp_st]() {filters(P, comp_st);}, "Find"},
         {[&P, &comp_st]() {edit(P, comp_st);}, "Edit"},
         {[&P, &comp_st]() {save_into_file(P, comp_st);}, "Save"},
@@ -417,5 +426,5 @@ void process() {
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
     logfile.close();
-    return ;
+    return;
 }
