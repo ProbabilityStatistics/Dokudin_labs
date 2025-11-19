@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string>
 
-std::atomic<int> CS::next_id{0};
+std::atomic<int> CS::next_id{1};
 
 CS::CS() {
     id = CS::next_id.fetch_add(1, std::memory_order_relaxed);
@@ -49,7 +49,8 @@ bool CS::isEmpty() const {
 
 void CS::cs_save_into_file(std::ofstream &fout) const {
     fout << "CS" << std::endl;
-    fout << name << std::endl 
+    fout << id << std::endl 
+        << name << std::endl 
         << workshop_count << std::endl 
         << working_workshop << std::endl 
         << station_class << std::endl;

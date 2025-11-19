@@ -235,73 +235,72 @@ int choose_filter() {
     return ans;
 }
 
-std::vector<int> filters(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st) { //!!!! lambda func?
+std::pair<int, std::vector<int>> filters(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st) { //!!!! lambda func?
     int filter;
-    std::vector<int> id;
+    std::pair<int, std::vector<int>> id;
     filter = choose_filter();    
     if (filter == 1) {
-        id.push_back(-1);
+        id.first = 1;
         std::string name;
         std::cout << "Enter the pipe name: " << std::endl;
         name = get_str();
         for (const auto &p : P) {
             if (p.second.get_name().find(name) != std::string::npos) {
-                id.push_back(p.first);
+                id.second.push_back(p.first);
                 std::cout << p.second;
             }
         }
     } else if (filter == 2) {
-        id.push_back(-1);
+        id.first = 1;
         int repair;        
         repair = get_num();
         for (const auto &p : P) {
             if (p.second.get_repair() == repair) {
-                id.push_back(p.first);
+                id.second.push_back(p.first);
                 std::cout << p.second;
             }
         }
     } else if (filter == 3) {
-        id.push_back(-2);
+        id.first = 2;
         std::string name;
         std::cout << "Enter the cs name: " << std::endl;
         name = get_str();
         for (const auto &cs : comp_st) {
             if (cs.second.get_name().find(name) != std::string::npos) {
-                id.push_back(cs.first);
+                id.second.push_back(cs.first);
                 std::cout << cs.second;
             }
         }
     } else if (filter == 4) {
-        id.push_back(-2);
+        id.first = 2;
         double percent;
         percent = get_double();
         for (const auto &cs : comp_st) {
             if (cs.second.get_percent() == percent) {
-                id.push_back(cs.first);
+                id.second.push_back(cs.first);
                 std::cout << cs.second;
             }
         }
     } else {
         std::cout << "Error! Incorret input, returning to main menu" << std::endl;
-        id.push_back(-3);
         return id;
     }
     return id;
 }
 
-std::vector<int> enter_id() {
+std::pair<int, std::vector<int>> enter_id() {
     int id = -1, struct_type, flag = 1;
-    std::vector<int> ids;
+    std::pair<int, std::vector<int>> ids;
     while (flag) {
         std::cout << "Which struct?" << std::endl
             << "1. Pipe" << std::endl
             << "2. CS" << std::endl;
         struct_type = get_num();
         if (struct_type == 1) {
-            ids.push_back(-1);
+            ids.first = 1;
             flag = 0;
         } else if (struct_type == 2) {
-            ids.push_back(-2);
+            ids.first = 2;
             flag = 0;
         } else {
             std::cout << "Error! Incorrect input, try again" << std::endl;
@@ -310,43 +309,43 @@ std::vector<int> enter_id() {
     std::cout << "Enter the IDs, to stop enter 0: " << std::endl;
     while (id != 0) {
         id = get_num();
-        if (id > 0) ids.push_back(id);
+        if (id > 0) ids.second.push_back(id);
         else if (id != 0) std::cout << "ID must be >= 1, try again" << std::endl;
     }
     return ids;
 }
 
-void pipe_edit(std::unordered_map<int, Pipe> &P, std::vector<int> &ids) {
-    for (int i = 1; i < (int) ids.size(); i++) {
-        if (P.contains(ids[i])) {
-            P[ids[i]].repair_change();
+void pipe_edit(std::unordered_map<int, Pipe> &P, std::pair<int, std::vector<int>> &ids) {
+    for (int i = 0; i < (int) ids.second.size(); i++) {
+        if (P.contains(ids.second[i])) {
+            P[ids.second[i]].repair_change();
         }
     }
     return;
 }
 
-void pipe_delete(std::unordered_map<int, Pipe> &P, std::vector<int> &ids) {
-    for (int i = 1; i < (int) ids.size(); i++) {
-        if (P.contains(ids[i])) {
-            P.erase(ids[i]);
+void pipe_delete(std::unordered_map<int, Pipe> &P, std::pair<int, std::vector<int>> &ids) {
+    for (int i = 0; i < (int) ids.second.size(); i++) {
+        if (P.contains(ids.second[i])) {
+            P.erase(ids.second[i]);
         }
     }
     return;
 }
 
-void cs_edit(std::unordered_map<int, CS> &comp_st, std::vector<int> &ids, bool mode) {
-    for (int i = 1; i < (int) ids.size(); i++) {
-        if (comp_st.contains(ids[i])) {
-            comp_st[ids[i]].mode_change(mode);
+void cs_edit(std::unordered_map<int, CS> &comp_st, std::pair<int, std::vector<int>> &ids, bool mode) {
+    for (int i = 0; i < (int) ids.second.size(); i++) {
+        if (comp_st.contains(ids.second[i])) {
+            comp_st[ids.second[i]].mode_change(mode);
         }
     }
     return;
 }
 
-void cs_delete(std::unordered_map<int, CS> &comp_st, std::vector<int> &ids) {
-    for (int i = 1; i < (int) ids.size(); i++) {
-        if (comp_st.contains(ids[i])) {
-            comp_st.erase(ids[i]);
+void cs_delete(std::unordered_map<int, CS> &comp_st, std::pair<int, std::vector<int>> &ids) {
+    for (int i = 0; i < (int) ids.second.size(); i++) {
+        if (comp_st.contains(ids.second[i])) {
+            comp_st.erase(ids.second[i]);
         }
     }
     return;
@@ -357,7 +356,7 @@ void edit(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st
         << "1. Sort by filter" << std::endl
         << "2. Sort by IDs" << std::endl;
     int type = get_num();
-    std::vector<int> ids;
+    std::pair<int, std::vector<int>> ids;
     if (type == 1) {
         ids = filters(P, comp_st);
     } else if (type == 2) {
@@ -370,9 +369,9 @@ void edit(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st
         << "1. Change" << std::endl
         << "2. Delete" << std::endl;
     int mode = get_num();
-    if (mode == 1 && ids[0] == -1) {
+    if (mode == 1 && !ids.second.empty() && ids.first == 1) {
         pipe_edit(P, ids);
-    } else if (mode == 1 && ids[0] == -2) {
+    } else if (mode == 1 && !ids.second.empty() && ids.first == 2) {
         bool mode;
         std::cout << "Enter:" << std::endl
             << "1. Turn on" << std::endl
@@ -380,9 +379,9 @@ void edit(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st
         mode = get_num();
         if (mode == 1 || mode == 0) cs_edit(comp_st, ids, mode);
         else std::cout << "Error! Incorrect mode, returning to main menu" << std::endl;
-    } else if (mode == 2 && ids[0] == -1) {
+    } else if (mode == 2 && !ids.second.empty() && ids.first == 1) {
         pipe_delete(P, ids);
-    } else if (mode == 2 && ids[0] == -2) {
+    } else if (mode == 2 && !ids.second.empty() && ids.first == 2) {
         cs_delete(comp_st, ids);
     } else {
         std::cout << "Error! Incorrect input, returning to main menu" << std::endl;
@@ -412,7 +411,7 @@ void process() {
     };
     while (true) {
         int n = main_menu();
-        if (n != -1) {
+        if (n > -1 && n <= (int) actions.size()) {
             if (n == (int) actions.size()) {
                 break;
             } else {
