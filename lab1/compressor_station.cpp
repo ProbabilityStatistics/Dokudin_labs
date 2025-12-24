@@ -14,7 +14,13 @@ CS::CS() {
     workshop_count = -1;
 }
 
-CS::CS(std::string n, int count, int working, int st_cl) : name{n}, workshop_count{count}, working_workshop{working}, station_class{st_cl} {
+CS::CS(std::string n, int count, int working, int st_cl) : name{n}, station_class{st_cl} {
+    if (working > count) {
+        working = count;
+        std::cout << "Warning! Working workshop count > workshop count, set working workshop count to: " << count <<  std::endl;
+    }
+    workshop_count = count;
+    working_workshop = working;
     id = CS::next_id.fetch_add(1, std::memory_order_relaxed);
 }
 
@@ -59,6 +65,10 @@ void CS::cs_save_into_file(std::ofstream &fout) const {
 void CS::cs_read_from_file(std::ifstream &fin) {
     std::getline(fin>>std::ws, name);
     fin >> workshop_count >> working_workshop >> station_class;
+    if (working_workshop > workshop_count) {
+        working_workshop = workshop_count;
+        std::cout << "Warning! Working workshop count > workshop count, set working workshop count to: " << workshop_count <<  std::endl;
+    }
     return;
 }
 

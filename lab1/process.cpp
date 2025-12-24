@@ -10,6 +10,7 @@
 #include <limits>
 #include <fstream>
 #include <chrono>
+#include <variant>
 #include <fmt/chrono.h> // sudo apt install libfmt-dev
 #include <fmt/format.h>
 
@@ -22,30 +23,8 @@ int main_menu() {
     }
     std::cout << "Enter the menu number" << std::endl;
     std::string str;
-    int n = get_num();
-    if (n <= (int) operations.size() && n >= 1) {
-        return n - 1;
-    } else {
-        return -1;
-    }
-}
-
-int get_num() {
-    std::string str;
-    int n;
-    bool flag = 1;
-    while (flag) {
-        try {
-            std::cin >> str;
-            std::cerr << str << std::endl;
-            n = std::stoi(str);
-            flag = 0;
-        } catch (...) {
-            flag = 1;
-            std::cout << "Error! Incorrect input, try again" << std::endl;
-        }
-    }
-    return n;
+    int n = get_correct_number<int>(1, (int) operations.size());
+    return n - 1;
 }
 
 std::string get_str() {
@@ -55,28 +34,10 @@ std::string get_str() {
     return str;
 }
 
-double get_double() {
-    std::string str;
-    double n;
-    bool flag = 1;
-    while (flag) {
-        try {
-            std::cin >> str;
-            std::cerr << str << std::endl;
-            n = std::stod(str);
-            flag = 0;
-        } catch (...) {
-            flag = 1;
-            std::cout << "Error! Incorrect input, try again" << std::endl;
-        }
-    }
-    return n;
-}
-
 void execute_repair_change(std::unordered_map<int, Pipe> &P) {
     int id;
     std::cout << "Enter pipe ID" << std::endl;
-    id = get_num();
+    id = get_correct_number<int>(1, P.size());
     if (P.contains(id)) {
         P[id].repair_change();
     } else {
@@ -89,15 +50,11 @@ void execute_mode_change(std::unordered_map<int, CS> &comp_st) {
     int id;
     int mode;
     std::cout << "Enter compressor station ID" << std::endl;
-    id = get_num();
+    id = get_correct_number<int>(1, comp_st.size());
     if (comp_st.contains(id)) {
         std::cout << "Enter" << std::endl << "1. Turn on" << std::endl << "2. Turn off" << std::endl;
-        mode = get_num();
-        if (mode == 1 || mode == 2) {
-            comp_st[id].mode_change(mode);
-        } else {
-            std::cout << "Error! Incorrect input, returning in main menu" << std::endl;
-        }
+        mode = get_correct_number<int>(1, 2);
+        comp_st[id].mode_change(mode);
     } else {
         std::cout << "Error! The CS with this ID was not found" << std::endl;
     }
@@ -169,19 +126,19 @@ void read_from_file(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS
 
 void pipe_add(std::unordered_map<int, Pipe> &P) { //!!!!
     std::string name;
-    int len, diameter, repair;
+    double len;
+    int diameter;
+    bool repair;
     std::cout << "Print pipe name" << std::endl;
     name = get_str();
     std::cout << "Print pipe lenght" << std::endl;
-    len = get_double();
+    len = get_correct_number<double>(0, 2000);
     std::cout << "Print pipe diameter" << std::endl;
-    diameter = get_num();
+    diameter = get_correct_number<int>(0, 2000);
     std::cout << "Print pipe repair status" << std::endl;
-    repair = get_num();
-    if ((repair == 1 || repair == 0) && len > -1 && diameter > -1) {
-        Pipe p(name, len, diameter, repair);
-        P.emplace(p.get_id(), std::move(p));
-    } else std::cout << "Error! Incorrect input, returning in main menu" << std::endl;
+    repair = get_correct_number<bool>(0, 1);
+    Pipe p(name, len, diameter, repair);
+    P.emplace(p.get_id(), std::move(p));
     return;
 }
 
@@ -191,17 +148,13 @@ void cs_add(std::unordered_map<int, CS> &comp_st) { //!!!!
     std::cout << "Print CS name" << std::endl;
     name = get_str();
     std::cout << "Print CS workshops count" << std::endl;
-    workshop_count = get_num();
+    workshop_count = get_correct_number<int>(0, 2000);
     std::cout << "Print CS number of working workshops" << std::endl;
-    working_workshop = get_num();
+    working_workshop = get_correct_number<int>(0, workshop_count);
     std::cout << "Print CS station class" << std::endl;
-    station_class = get_num();
-    if (working_workshop > -1 && workshop_count > -1 && station_class > -1) {
-        CS cs(name, workshop_count, working_workshop, station_class);
-        comp_st.emplace(cs.get_id(), std::move(cs));
-    } else {
-        std::cout << "Error! Incorrect input, returning in main menu" << std::endl;
-    }
+    station_class = get_correct_number<int>(0, 2000);
+    CS cs(name, workshop_count, working_workshop, station_class);
+    comp_st.emplace(cs.get_id(), std::move(cs));
     return;
 }
 
@@ -217,171 +170,163 @@ void cs_info(const std::unordered_map<int, CS> &comp_st) {
     return;
 }
 
-int choose_filter() {
+bool check_by_repair(const Pipe &s, const bool param) {
+	return s.get_repair() == param;
+}
+
+bool check_by_occupancy(const CS &s, const double param) {
+	return s.get_percent() == param;
+}
+
+int choose_filter(int struct_type) {
     std::string str;
-    int struct_type, filter, ans = 0;
-    std::cout << "Enter: " << std::endl
-        << "1. Pipe" << std::endl
-        << "2. CS" << std::endl;
-    struct_type = get_num();
-    if (struct_type < 1 || struct_type > 2) return -1;
+    int filter, ans = 0;
     std::cout << "Enter: " << std::endl
         << "1. Filter by name" << std::endl
         << "2. Filter by parameter" << std::endl;
-    filter = get_num();
-    if (filter < 1 || filter > 2) return -1;
+    filter = get_correct_number<int>(1, 2);
     if (struct_type == 1) ans = filter;
     else if (struct_type == 2) ans = filter + 2;
     return ans;
 }
 
-std::pair<int, std::vector<int>> filters(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st) { //!!!! lambda func?
-    int filter;
-    std::pair<int, std::vector<int>> id;
-    filter = choose_filter();    
-    if (filter == 1) {
-        id.first = 1;
-        std::string name;
-        std::cout << "Enter the pipe name: " << std::endl;
-        name = get_str();
-        for (const auto &p : P) {
-            if (p.second.get_name().find(name) != std::string::npos) {
-                id.second.push_back(p.first);
-                std::cout << p.second;
-            }
-        }
-    } else if (filter == 2) {
-        id.first = 1;
-        int repair;        
-        repair = get_num();
-        for (const auto &p : P) {
-            if (p.second.get_repair() == repair) {
-                id.second.push_back(p.first);
-                std::cout << p.second;
-            }
-        }
-    } else if (filter == 3) {
-        id.first = 2;
-        std::string name;
-        std::cout << "Enter the cs name: " << std::endl;
-        name = get_str();
-        for (const auto &cs : comp_st) {
-            if (cs.second.get_name().find(name) != std::string::npos) {
-                id.second.push_back(cs.first);
-                std::cout << cs.second;
-            }
-        }
-    } else if (filter == 4) {
-        id.first = 2;
-        double percent;
-        percent = get_double();
-        for (const auto &cs : comp_st) {
-            if (cs.second.get_percent() == percent) {
-                id.second.push_back(cs.first);
-                std::cout << cs.second;
-            }
-        }
+void filtration(std::unordered_map<int, Pipe> &p, std::unordered_map<int, CS> &cs) {
+    std::cout << "Enter struct: " << std::endl
+        << "1. Pipe" << std::endl
+        << "2. CS" << std::endl;
+    int struct_type = get_correct_number<int>(1, 2);
+    int filter_num = choose_filter(struct_type);
+    std::variant<std::string, bool, double> param;
+    if (filter_num == 1 || filter_num == 3) {
+        std::cout << "Enter struct name: " << std::endl;
+        param = get_str();
+    } else if (filter_num == 2) {
+        std::cout << "Enter repair status (0. under repair, 1. repaired)" << std::endl;
+        param = get_correct_number<bool>(0, 1);
     } else {
-        std::cout << "Error! Incorret input, returning to main menu" << std::endl;
-        return id;
+        std::cout << "Enter percent" << std::endl;
+        param = get_correct_number<double>(0.0, 100.0);
     }
-    return id;
+    std::vector<std::function<bool()>> filter_func = {
+        check_by_name, check_by_repair, check_by_name, check_by_occupancy
+    };
+    if (struct_type == 1)
+        std::visit([&p, &filter_num, &filter_func](auto&& arg) {
+            size_t idx = filter_num - 1;
+            find_by_filter(p, filter_func[idx], arg);
+        }, param);
+    else 
+        std::visit([&cs, &filter_num, &filter_func](auto&& arg) {
+            find_by_filter(cs, filter_func[idx], arg);
+        }, param);
+    return;
 }
 
-std::pair<int, std::vector<int>> enter_id() {
-    int id = -1, struct_type, flag = 1;
-    std::pair<int, std::vector<int>> ids;
-    while (flag) {
-        std::cout << "Which struct?" << std::endl
-            << "1. Pipe" << std::endl
-            << "2. CS" << std::endl;
-        struct_type = get_num();
-        if (struct_type == 1) {
-            ids.first = 1;
-            flag = 0;
-        } else if (struct_type == 2) {
-            ids.first = 2;
-            flag = 0;
-        } else {
-            std::cout << "Error! Incorrect input, try again" << std::endl;
-        }
-    }
+std::vector<int> enter_id() {
+    int id = -1;
+    std::vector<int> ids;
     std::cout << "Enter the IDs, to stop enter 0: " << std::endl;
     while (id != 0) {
-        id = get_num();
-        if (id > 0) ids.second.push_back(id);
+        id = get_correct_number<int>(0, INT32_MAX);
+        if (id > 0) ids.push_back(id);
         else if (id != 0) std::cout << "ID must be >= 1, try again" << std::endl;
     }
     return ids;
 }
 
-void pipe_edit(std::unordered_map<int, Pipe> &P, std::pair<int, std::vector<int>> &ids) {
-    for (int i = 0; i < (int) ids.second.size(); i++) {
-        if (P.contains(ids.second[i])) {
-            P[ids.second[i]].repair_change();
+void pipe_edit(std::unordered_map<int, Pipe> &P, std::vector<int> &ids) {
+    for (int i = 0; i < (int) ids.size(); i++) {
+        if (P.contains(ids[i])) {
+            P[ids[i]].repair_change();
         }
     }
     return;
 }
 
-void pipe_delete(std::unordered_map<int, Pipe> &P, std::pair<int, std::vector<int>> &ids) {
-    for (int i = 0; i < (int) ids.second.size(); i++) {
-        if (P.contains(ids.second[i])) {
-            P.erase(ids.second[i]);
+void pipe_delete(std::unordered_map<int, Pipe> &P, std::vector<int> &ids) {
+    for (int i = 0; i < (int) ids.size(); i++) {
+        if (P.contains(ids[i])) {
+            P.erase(ids[i]);
         }
     }
     return;
 }
 
-void cs_edit(std::unordered_map<int, CS> &comp_st, std::pair<int, std::vector<int>> &ids, bool mode) {
-    for (int i = 0; i < (int) ids.second.size(); i++) {
-        if (comp_st.contains(ids.second[i])) {
-            comp_st[ids.second[i]].mode_change(mode);
+void cs_edit(std::unordered_map<int, CS> &comp_st, std::vector<int> &ids, bool mode) {
+    for (int i = 0; i < (int) ids.size(); i++) {
+        if (comp_st.contains(ids[i])) {
+            comp_st[ids[i]].mode_change(mode);
         }
     }
     return;
 }
 
-void cs_delete(std::unordered_map<int, CS> &comp_st, std::pair<int, std::vector<int>> &ids) {
-    for (int i = 0; i < (int) ids.second.size(); i++) {
-        if (comp_st.contains(ids.second[i])) {
-            comp_st.erase(ids.second[i]);
+void cs_delete(std::unordered_map<int, CS> &comp_st, std::vector<int> &ids) {
+    for (int i = 0; i < (int) ids.size(); i++) {
+        if (comp_st.contains(ids[i])) {
+            comp_st.erase(ids[i]);
         }
     }
     return;
 }
 
 void edit(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st) {
+    int struct_type;
+    std::cout << "Enter:" << std::endl
+        << "1. Pipe" << std::endl
+        << "2. CS" << std::endl;
+    struct_type = get_correct_number<int>(1, 2);
     std::cout << "Enter:" << std::endl
         << "1. Sort by filter" << std::endl
         << "2. Sort by IDs" << std::endl;
-    int type = get_num();
-    std::pair<int, std::vector<int>> ids;
+    int type = get_correct_number<int>(1, 2);
+    std::vector<int> ids;
     if (type == 1) {
-        ids = filters(P, comp_st);
-    } else if (type == 2) {
+        int filter_num = choose_filter(struct_type);
+        std::variant<std::string, bool, double> param;
+        if (filter_num == 1 || filter_num == 3) {
+            std::cout << "Enter struct name: " << std::endl;
+            param = get_str();
+        } else if (filter_num == 2) {
+            std::cout << "Enter repair status (0. under repair, 1. repaired)" << std::endl;
+            param = get_correct_number<bool>(0, 1);
+        } else {
+            std::cout << "Enter percent" << std::endl;
+            param = get_correct_number<double>(0.0, 100.0);
+        }
+        std::vector<std::function<bool()>> filter_func = {
+            check_by_name, check_by_repair, check_by_name, check_by_occupancy
+        };
+        if (struct_type == 1) 
+            std::visit([&P, &filter_num, &filter_func, &ids](auto&& arg) {
+                size_t idx = filter_num - 1;
+                ids = find_by_filter(P, filter_func[idx], arg);
+            }, param);
+        else 
+            std::visit([&comp_st, &filter_num, &filter_func, &ids](auto&& arg) {
+                size_t idx = filter_num - 1;
+                ids = find_by_filter(comp_st, filter_func[idx], arg);
+            }, param);
+    } else{
         ids = enter_id();
-    } else {
-        std::cout << "Error! Incorrect input, returning to main menu" << std::endl;
-        return;
     }
     std::cout << "Enter:" << std::endl
         << "1. Change" << std::endl
         << "2. Delete" << std::endl;
-    int mode = get_num();
-    if (mode == 1 && !ids.second.empty() && ids.first == 1) {
+    int mode = get_correct_number<int>(1, 2);
+    if (mode == 1 && !ids.empty() && struct_type == 1) {
         pipe_edit(P, ids);
-    } else if (mode == 1 && !ids.second.empty() && ids.first == 2) {
+    } else if (mode == 1 && !ids.empty() && struct_type == 2) {
         bool mode;
         std::cout << "Enter:" << std::endl
-            << "1. Turn on" << std::endl
-            << "2. Turn off" << std::endl;
-        mode = get_num();
+            << "0. Turn off" << std::endl
+            << "1. Turn on" << std::endl;
+        mode = get_correct_number<bool>(0, 1);
         if (mode == 1 || mode == 0) cs_edit(comp_st, ids, mode);
         else std::cout << "Error! Incorrect mode, returning to main menu" << std::endl;
-    } else if (mode == 2 && !ids.second.empty() && ids.first == 1) {
+    } else if (mode == 2 && !ids.empty() && struct_type == 1) {
         pipe_delete(P, ids);
-    } else if (mode == 2 && !ids.second.empty() && ids.first == 2) {
+    } else if (mode == 2 && !ids.empty() && struct_type == 2) {
         cs_delete(comp_st, ids);
     } else {
         std::cout << "Error! Incorrect input, returning to main menu" << std::endl;
@@ -404,7 +349,7 @@ void process() {
         {[&comp_st]() {cs_add(comp_st);}, "Create CS"},
         {[&comp_st]() {cs_info(comp_st);}, "Print CS info"},
         {[&comp_st]() {execute_mode_change(comp_st);}, "Change CS working workshops"},
-        {[&P, &comp_st]() {filters(P, comp_st);}, "Find"},
+        {[&P, &comp_st]() {filtration(P, comp_st);}, "Find"},
         {[&P, &comp_st]() {edit(P, comp_st);}, "Edit"},
         {[&P, &comp_st]() {save_into_file(P, comp_st);}, "Save"},
         {[&P, &comp_st]() {read_from_file(P, comp_st);}, "Load"},
