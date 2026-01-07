@@ -10,7 +10,6 @@
 #include <limits>
 #include <fstream>
 #include <chrono>
-#include <variant>
 #include <fmt/chrono.h> // sudo apt install libfmt-dev
 #include <fmt/format.h>
 
