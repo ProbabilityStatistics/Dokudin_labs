@@ -34,6 +34,10 @@ void Pipe::repair_change() {
     repair = !repair;
 }
 
+void Pipe::repair_set(bool mode) {
+    repair = mode;
+}
+
 bool Pipe::isEmpty () const{
     if (len == 0 && diameter == 0) return 1;
     else return 0;

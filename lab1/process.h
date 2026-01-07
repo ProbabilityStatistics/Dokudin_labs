@@ -38,7 +38,7 @@ void cs_add(std::unordered_map<int, CS> &comp_st);
 void pipe_info(const std::unordered_map<int, Pipe> &P);
 void cs_info(const std::unordered_map<int, CS> &comp_st);
 std::vector<int> filtration(std::unordered_map<int, Pipe> &p, std::unordered_map<int, CS> &cs, int struct_type = 0);
-void filtration_void_wrapper(std::unordered_map<int, Pipe> &p, std::unordered_map<int, CS> &cs);
+void print_filtration(std::unordered_map<int, Pipe> &p, std::unordered_map<int, CS> &cs);
 std::string get_str();
 std::vector<int> enter_id();
 void pipe_edit(std::unordered_map<int, Pipe> &P, std::pair<int, std::vector<int>> &ids);
@@ -49,8 +49,8 @@ void edit(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st
 bool check_by_repair(const Pipe &s, const bool param);
 bool check_by_occupancy(const CS &s, const double param);
 
-//template<typename T, typename S>
-//using Filter = bool(*)(const S &s, const T &param); // https://github.com/papilinatm/cpp_lessons_2020/blob/master/cpp_lessons/main.cpp
+template<typename T, typename S>
+using Filter = bool(*)(const S &s, const T &param); // https://github.com/papilinatm/cpp_lessons_2020/blob/master/cpp_lessons/main.cpp
 
 template <typename T>
 T get_correct_number(T min, T max)  // https://github.com/papilinatm/cpp_lessons_2020/blob/master/cpp_lessons/utils.h
@@ -73,11 +73,11 @@ bool check_by_name(const T &s, const std::string &param) {
 	return s.get_name().find(param) != std::string::npos;
 }
 
-template<typename T, typename S, typename F>
-std::vector<int> find_by_filter(const std::unordered_map<int, S>& st, F func, T param) {
+template<typename T, typename S>
+std::vector<int> find_by_filter(const std::unordered_map<int, S>& st, Filter<T, S> f, T param) {
 	std::vector<int> res;
 	for (auto& s : st) {
-		if (func(s.second, param))
+		if (f(s.second, param))
 			res.push_back(s.first);
 	}
 	return res;
@@ -88,6 +88,16 @@ void delete_by_ids(std::unordered_map<int, T>& collection, const std::vector<int
     for (int id : ids) {
         collection.erase(id);
     }
+}
+
+template<typename T>
+void edit_by_ids(std::unordered_map<int, T> &obj, std::vector<int> &ids, void (T::*change)(bool), bool mode) {
+    for (int id : ids) {
+        if (obj.contains(id)) {
+            (obj[id].*change)(mode);
+        }
+    }
+    return;
 }
 
 #endif

@@ -18,6 +18,7 @@ public:
     ~Pipe();
     void print_pipe_data() const;
     void repair_change();
+    void repair_set(bool mode);
     bool isEmpty() const;
     void pipe_save_into_file(std::ofstream &fout) const;
     void pipe_read_from_file(std::ifstream &fin);

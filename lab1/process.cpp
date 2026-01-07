@@ -17,7 +17,7 @@
 int main_menu() {
     std::cout << "Menu" << std::endl;
     std::vector <std::string> operations = {"Add new pipe", "Print pipes info", "Change repair status",
-                "Add new CS", "Print CSs info", "Change CS working workshops", "Find", "Edit", "Save", "Load", "Exit"};
+                "Add new CS", "Print CSs info", "Change CS working workshops", "Filter", "Edit", "Save", "Load", "Exit"};
     for (int i = 0; i < (int) operations.size(); i++) {
         std::cout << i + 1 << ". " << operations[i] << std::endl;
     }
@@ -170,11 +170,11 @@ void cs_info(const std::unordered_map<int, CS> &comp_st) {
     return;
 }
 
-bool check_by_repair(const Pipe &s, const bool param) {
+bool check_by_repair(const Pipe &s, const bool &param) {
 	return s.get_repair() == param;
 }
 
-bool check_by_occupancy(const CS &s, const double param) {
+bool check_by_occupancy(const CS &s, const double &param) {
 	return s.get_percent() == param;
 }
 
@@ -194,7 +194,7 @@ std::vector<int> filtration(std::unordered_map<int, Pipe> &p, std::unordered_map
         if (filter_choice == 1) {
             std::string name;
             std::cout << "Enter name: ";
-            std::cin >> name;
+            name = get_str();
             ids = find_by_filter(p, check_by_name<Pipe>, name);
         } else {
             bool repair_status;
@@ -206,7 +206,7 @@ std::vector<int> filtration(std::unordered_map<int, Pipe> &p, std::unordered_map
         if (filter_choice == 1) {
             std::string name;
             std::cout << "Enter name: ";
-            std::cin >> name;
+            name = get_str();
             ids = find_by_filter(cs, check_by_name<CS>, name);
         } else {
             double percent;
@@ -220,7 +220,7 @@ std::vector<int> filtration(std::unordered_map<int, Pipe> &p, std::unordered_map
     return ids;
 }
 
-void filtration_void_wrapper(std::unordered_map<int, Pipe> &p, std::unordered_map<int, CS> &cs) {
+void print_filtration(std::unordered_map<int, Pipe> &p, std::unordered_map<int, CS> &cs) {
     std::cout << "Choose struct: " << std::endl
         << "1. Pipe" << std::endl
         << "2. CS" << std::endl;
@@ -252,24 +252,6 @@ std::vector<int> enter_id() {
     return ids;
 }
 
-void pipe_edit(std::unordered_map<int, Pipe> &P, std::vector<int> &ids) {
-    for (int id : ids) {
-        if (P.contains(id)) {
-            P[id].repair_change();
-        }
-    }
-    return;
-}
-
-void cs_edit(std::unordered_map<int, CS> &comp_st, std::vector<int> &ids, bool mode) {
-    for (int id : ids) {
-        if (comp_st.contains(id)) {
-            comp_st[id].mode_change(mode);
-        }
-    }
-    return;
-}
-
 void edit(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st) {
     std::vector<int> ids;
     std::cout << "Enter:" << std::endl
@@ -291,7 +273,10 @@ void edit(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st
     int mode = get_correct_number<int>(1, 2);
     if (struct_type == 1) {
         if (mode == 1) {
-            pipe_edit(P, ids);
+            std::cout << "Enter mode (1 - under repair, 0 - repaired): ";
+            bool mode;
+            mode = get_correct_number<bool>(0, 1);
+            edit_by_ids(P, ids, &Pipe::repair_set, mode);
             std::cout << "Pipes edited" << std::endl;
         } else {
             delete_by_ids(P, ids);
@@ -302,7 +287,7 @@ void edit(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st
             std::cout << "Enter mode (1 to increase, 0 to decrease): ";
             bool mode;
             mode = get_correct_number<bool>(0, 1);
-            cs_edit(comp_st, ids, mode);
+            edit_by_ids(comp_st, ids, &CS::mode_change, mode);
             std::cout << "CSs edited" << std::endl;
         } else {
             delete_by_ids(comp_st, ids);
@@ -327,7 +312,7 @@ void process() {
         {[&comp_st]() {cs_add(comp_st);}, "Create CS"},
         {[&comp_st]() {cs_info(comp_st);}, "Print CS info"},
         {[&comp_st]() {execute_mode_change(comp_st);}, "Change CS working workshops"},
-        {[&P, &comp_st]() {filtration_void_wrapper(P, comp_st);}, "Filter"},
+        {[&P, &comp_st]() {print_filtration(P, comp_st);}, "Filter"},
         {[&P, &comp_st]() {edit(P, comp_st);}, "Edit"},
         {[&P, &comp_st]() {save_into_file(P, comp_st);}, "Save"},
         {[&P, &comp_st]() {read_from_file(P, comp_st);}, "Load"},
