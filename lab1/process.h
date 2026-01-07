@@ -76,8 +76,7 @@ bool check_by_name(const T &s, const std::string &param) {
 template<typename T, typename S>
 std::vector<int> find_by_filter(const std::unordered_map<int, S>& st, Filter<T, S> f, T param) {
 	std::vector<int> res;
-	for (auto& s : st)
-	{
+	for (auto& s : st) {
 		if (f(s.second, param))
 			res.push_back(s.first);
 	}

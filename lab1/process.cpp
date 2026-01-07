@@ -207,17 +207,15 @@ void filtration(std::unordered_map<int, Pipe> &p, std::unordered_map<int, CS> &c
         std::cout << "Enter percent" << std::endl;
         param = get_correct_number<double>(0.0, 100.0);
     }
-    std::vector<std::function<bool()>> filter_func = {
-        check_by_name, check_by_repair, check_by_name, check_by_occupancy
-    };
     if (struct_type == 1)
-        std::visit([&p, &filter_num, &filter_func](auto&& arg) {
-            size_t idx = filter_num - 1;
-            find_by_filter(p, filter_func[idx], arg);
+        std::visit([&p, &filter_num](auto&& arg) {
+            if (filter_num == 2) find_by_filter(p, check_by_repair, arg);
+            else find_by_filter(p, check_by_name, arg);
         }, param);
     else 
-        std::visit([&cs, &filter_num, &filter_func](auto&& arg) {
-            find_by_filter(cs, filter_func[idx], arg);
+        std::visit([&cs, &filter_num](auto&& arg) {
+            if (filter_num == 4) find_by_filter(cs, check_by_occupancy, arg);
+            else find_by_filter(cs, check_by_name, arg);
         }, param);
     return;
 }
@@ -294,18 +292,15 @@ void edit(std::unordered_map<int, Pipe> &P, std::unordered_map<int, CS> &comp_st
             std::cout << "Enter percent" << std::endl;
             param = get_correct_number<double>(0.0, 100.0);
         }
-        std::vector<std::function<bool()>> filter_func = {
-            check_by_name, check_by_repair, check_by_name, check_by_occupancy
-        };
         if (struct_type == 1) 
-            std::visit([&P, &filter_num, &filter_func, &ids](auto&& arg) {
-                size_t idx = filter_num - 1;
-                ids = find_by_filter(P, filter_func[idx], arg);
+            std::visit([&P, &filter_num, &ids](auto&& arg) {
+                if (filter_num == 2) ids = find_by_filter(P, check_by_repair, arg);
+                else ids = find_by_filter(P, check_by_name, arg);
             }, param);
         else 
-            std::visit([&comp_st, &filter_num, &filter_func, &ids](auto&& arg) {
-                size_t idx = filter_num - 1;
-                ids = find_by_filter(comp_st, filter_func[idx], arg);
+            std::visit([&cs, &filter_num, &ids](auto&& arg) {
+                if (filter_num == 4) ids = find_by_filter(comp_st, check_by_occupancy, arg);
+                else ids = find_by_filter(comp_st, check_by_name, arg);
             }, param);
     } else{
         ids = enter_id();
